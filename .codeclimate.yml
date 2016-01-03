@@ -7,6 +7,8 @@ engines:
   phpmd:
     enabled: true
     checks:
+      Controversial/Superglobals:
+        enabled: false
       CleanCode/BooleanArgumentFlag:
         enabled: false
       CleanCode/ElseExpression:
