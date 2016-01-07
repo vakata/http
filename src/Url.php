@@ -1,116 +1,257 @@
 <?php
-
 namespace vakata\http;
 
+/**
+ * A class representing an URL
+ */
 class Url implements UrlInterface
 {
-    protected $appr = '';
-    protected $webr = '';
-    protected $reqt = '';
-    protected $serv = '';
-    protected $segs = [];
-    protected $extn = '';
-    protected $domn = '';
-
-    public function __construct($approot = null, $webroot = null)
+    protected $data = [];
+    /**
+     * Create an instance.
+     * @method __construct
+     * @param  string      $url the URL to parse
+     */
+    public function __construct($url)
     {
-        $temp = [];
-        $this->appr = $approot ? rtrim($approot, '/\\') : dirname($_SERVER['SCRIPT_NAME']); // getcwd()
-        $this->webr = $webroot ? preg_replace('@/+@', '/', '/'.$webroot.'/') : preg_replace('@/+@', '/', '/'.str_replace('\\', '/', str_replace(str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, trim($_SERVER['DOCUMENT_ROOT'], '/\\')), '', $this->appr)).'/');
-        $this->reqt = htmlentities(trim(preg_replace(array('(^'.preg_quote($this->webr).')ui'), '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
-        $this->serv = 'http'.(!empty($_SERVER['HTTPS']) ? 's' : '').'://'.htmlentities($_SERVER['SERVER_NAME']);
-        $this->segs = array_filter(explode('/', $this->reqt), function ($var) { return $var !== ''; });
-        $this->extn = strpos($this->reqt, '.') ? substr($this->reqt, strrpos($this->reqt, '.') + 1) : '';
-        $this->domn = trim(preg_replace('@^www\.@', '', htmlentities($_SERVER['SERVER_NAME'])), '/');
-        $this->extn = preg_match('(\.([a-z0-9]{2,4})$)i', $_SERVER['REQUEST_URI'], $temp) ? $temp[1] : '';
-        if (
-            (!empty($_SERVER['HTTPS']) && (int) $_SERVER['SERVER_PORT'] !== 443) ||
-            (empty($_SERVER['HTTPS']) && (int) $_SERVER['SERVER_PORT'] !== 80)
-        ) {
-            $this->serv .= ':'.(int) $_SERVER['SERVER_PORT'];
+        $this->data = parse_url($url);
+        if ($this->data === false) {
+            throw new \Exception('Invalid input string');
         }
-    }
 
-    public function current($withQuery = true)
-    {
-        return $this->serv.$this->webr.$this->reqt.($withQuery && isset($_SERVER['QUERY_STRING']) && strlen($_SERVER['QUERY_STRING']) ? '?'.$_SERVER['QUERY_STRING'] : '');
+        $port = isset($_SERVER) && isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : 80;
+        $scheme = isset($_SERVER) && isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) ? 'https' : 'http';
+        $this->data = array_merge([
+            'scheme' => $scheme,
+            'host' => isset($_SERVER) && isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost',
+            'port' => ($scheme === 'http' && $port !== 80) || ($scheme === 'https' && $port !== 443) ? $port : null,
+            'user' => null,
+            'pass' => null,
+            'path' => '/',
+            'query' => null,
+            'fragment' => null
+        ], $this->data);
     }
-    public function segments()
+    /**
+     * Create an instance from the current request.
+     * @method fromRequest
+     * @return vakata\http\Url  the URL instance of the current request
+     */
+    public static function fromRequest()
     {
-        return $this->segs;
-    }
-    public function segment($i, $stripExtension = false)
-    {
-        $i = (int) $i;
-        if ($i < 0) {
-            $i = count($this->segs) + $i;
+        $port = (int)$_SERVER['SERVER_PORT'];
+        $scheme = !empty($_SERVER['HTTPS']) ? 'https' : 'http';
+        $url = $scheme . '://' . $_SERVER['SERVER_NAME'];
+        if (($scheme === 'http' && $port !== 80) || ($scheme === 'https' && $port !== 443)) {
+            $url .= ':' . $port;
         }
-        $seg = isset($this->segs[$i]) ? urldecode($this->segs[$i]) : null;
-
-        return $seg === null || !$stripExtension || !strlen($this->extn) ? $seg : preg_replace('@\.'.preg_quote($this->extn).'$@ui', '', $seg);
+        $url .= '/' . trim($_SERVER['REQUEST_URI'], '/');
+        if (strlen($_SERVER['QUERY_STRING'])) {
+            $url .= '?' . $_SERVER['QUERY_STRING'];
+        }
+        return new self($url);
     }
+    /**
+     * get the URL scheme (http, https, etc), defaults to `"http"`
+     * @method scheme
+     * @return string the scheme
+     */
+    public function scheme()
+    {
+        return $this->scheme;
+    }
+    /**
+     * get the host part of the URL (for example - google.com), defaults to `"localhost"`
+     * @method host
+     * @return string the host
+     */
+    public function host()
+    {
+        return $this->host;
+    }
+    /**
+     * get the port, if a standart port is used this will return `null`
+     * @method port
+     * @return string|null the port
+     */
+    public function port()
+    {
+        return $this->port;
+    }
+    /**
+     * get the user part of the URL (if supplied in the form scheme://user:pass@domain.tld/)
+     * @method user
+     * @return string|null the username
+     */
+    public function user()
+    {
+        return $this->user;
+    }
+    /**
+     * get the password part of the URL (if supplied in the form scheme://user:pass@domain.tld/)
+     * @method pass
+     * @return string|null the password
+     */
+    public function pass()
+    {
+        return $this->pass;
+    }
+    /**
+     * returns the path part of the URL
+     * @method path
+     * @param  boolean $ext should the extension (for example .html) be returned (if any), defaults to `true`
+     * @return [type]       [description]
+     */
+    public function path($ext = true)
+    {
+        return $ext ? $this->path : preg_replace('(\.[^/.]+$)', '', $this->path);
+    }
+    /**
+     * get the extension part of the URL (like: html, gif, jpg)
+     * @method extension
+     * @param  string    $default the default to use if the URL does not have an extension (optional)
+     * @return string|null             the extenstion
+     */
     public function extension($default = null)
     {
-        return $this->extn === '' ? $default : $this->extn;
+        return strpos($this->segment(-1), '.') !== false ? preg_replace('(.*\.)', '', $this->segment(-1)) : $default;
     }
-    public function root()
+    /**
+     * get the query part of the URL (after the question mark)
+     * @method query
+     * @return string the query
+     */
+    public function query()
     {
-        return $this->webr;
+        return $this->query;
     }
-    public function base()
+    /**
+     * get the fragment part of the URL (after the hash sign)
+     * @method fragment
+     * @return string   the fragment
+     */
+    public function fragment()
     {
-        return $this->serv.$this->webr;
+        return $this->fragment;
     }
-    public function request($ext = true)
+    /**
+     * get the path part of the URL as an array (the path string exploded by `/`)
+     * @method segments
+     * @return array   the path segments
+     */
+    public function segments()
     {
-        return $ext || !strlen($this->extn) ? $this->reqt : preg_replace('@\.'.preg_quote($this->extn).'$@ui', '', $this->reqt);
+        return array_values(array_filter(explode('/', $this->path), function ($var) { return $var !== ''; }));
     }
-    public function server()
+    /**
+     * get a specific segment from the path part of the URL
+     * @method segment
+     * @param  integer  $i  the index of the segment (can be negative too)
+     * @param  boolean $ext should the extension be included (if the segment is the last one), defaults to `true`
+     * @return string|null  the segment (or null if the index is invalid)
+     */
+    public function segment($i, $ext = true)
     {
-        return $this->serv;
+        $segs = $this->segments();
+        $i = (int) $i;
+        if ($i < 0) {
+            $i = count($segs) + $i;
+        }
+        if (!isset($segs[$i])) {
+            return null;
+        }
+        return $ext ? $segs[$i] : preg_replace('(\.[^/.]+$)', '', $segs[$i]);
     }
-    public function domain()
+    /**
+     * get the entire URL back as a string
+     * @method __toString
+     * @return string     the URL
+     */
+    public function __toString()
     {
-        return $this->domn;
+        $url = $this->scheme . '://';
+        if ($this->user && $this->pass) {
+            $url .= $this->user . ':' . $this->pass . '@';
+        }
+        $url .= $this->host;
+        if ($this->port) {
+            $url .= ':' . $this->port;
+        }
+        $url .= $this->path;
+        if ($this->query) {
+            $url .= '?' . $this->query;
+        }
+        if ($this->fragment) {
+            $url .= '#' . $this->fragment;
+        }
+        return $url;
     }
-    public function get($req = '', array $params = null)
+    public function __get($k)
     {
-        if (strpos($req, '//') == false) {
-            if (!isset($req[0]) || $req[0] !== '/') {
-                $req = $this->webr.$req;
+        return isset($this->data[$k]) ? $this->data[$k] : null;
+    }
+    /**
+     * get a link from the current URL to another one
+     * @method linkTo
+     * @param  UrlInterface|string $url the URL to link to
+     * @param  boolean $forceAbsolute   should an absolute path be used, defaults to `true`)
+     * @return string  the link
+     */
+    public function linkTo($url, $forceAbsolute = true)
+    {
+        if (is_string($url)) {
+            $url = new Url($url);
+        }
+
+        $str = (string)$url;
+        if ($this->scheme !== $url->scheme()) {
+            return $str;
+        }
+        $str = preg_replace('(^[^/]+//)', '', $str);
+        if ($this->host !== $url->host() || $this->port !== $url->port()) {
+            return '//' . $str;
+        }
+        $str = preg_replace('(^[^/]+)', '', $str);
+        if ($this->path !== $url->path()) {
+            if ($forceAbsolute) {
+                return $str;
             }
-            $req = array_map('urlencode', explode('/', trim($req, '/')));
-            foreach ($req as $k => $v) {
-                if ($v == '..' && $k) {
-                    unset($req[$k - 1]);
-                } elseif ($v == '.' || $v == '..') {
-                    unset($req[$k]);
+            $cnt = 0;
+            $tseg = $this->segments();
+            $useg = $url->segments();
+            foreach ($tseg as $k => $v) {
+                if (!isset($useg[$k]) || $useg[$k] !== $v) {
+                    break;
                 }
+                $cnt ++;
             }
-            $req = $this->serv.'/'.implode('/', $req);
+            $str = './' . str_repeat('../', count($useg) - $cnt) . implode('/', array_slice($useg, $cnt));
+            if ($url->query) {
+                $str .= '?' . $url->query;
+            }
+            if ($url->fragment) {
+                $str .= '#' . $url->fragment;
+            }
+            return $str;
         }
-        if ($params) {
-            $params = http_build_query($params);
-            $req = $req.'?'.$params;
+        $str = preg_replace('(^[^?]+)', '', $str);
+        if ($this->query !== $url->query() || $url->fragment === null) {
+            return $str;
         }
-
-        return $req;
+        return '#' . $url->fragment;
     }
-    public function abs($req = '', array $params = null)
+    /**
+     * get a link to the current URL from another one
+     * @method linkFrom
+     * @param  UrlInterface|string $url the URL to link from
+     * @param  boolean  $forceAbsolute  should an absolute path be used, defaults to `true`
+     * @return string                   the link
+     */
+    public function linkFrom($url, $forceAbsolute = true)
     {
-        return preg_replace('(^([^/]+//)?[^/]+/)', '/', $this->get($req, $params));
-    }
-    public function rel($req = '', array $params = null, $relative_to = null)
-    {
-        $cur = $relative_to ? $this->get($relative_to) : $this->current(false);
-        $cur = $this->current(false);
-        $bas = trim($this->base(), '/');
-        $cur = trim(str_replace($bas, '', $cur), '/');
-        $cur = count(explode('/', $cur)) - 1;
-        $req = $this->get($req, $params);
-        $req = str_replace($bas, './'.str_repeat('/../', $cur), $req);
-        $req = str_replace('//', '/', $req);
-
-        return $req;
+        if (is_string($url)) {
+            $url = new Url($url);
+        }
+        return $url->linkTo($this, $forceAbsolute);
     }
 }

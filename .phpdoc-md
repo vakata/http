@@ -6,6 +6,7 @@ return (object)[
     'classes' => [
         '\\vakata\\http\\Request',
         '\\vakata\\http\\Response',
-        '\\vakata\\http\\Url'
+        '\\vakata\\http\\Url',
+        '\\vakata\\http\\Upload'
     ],
 ];
