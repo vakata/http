@@ -4,17 +4,25 @@ namespace vakata\http;
 
 interface UrlInterface
 {
-    public function scheme();
-    public function host();
-    public function port();
-    public function user();
-    public function pass();
-    public function path($ext = true);
-    public function extension($default = null);
-    public function query();
-    public function fragment();
-    public function segments();
-    public function segment($i, $ext = true);
+    public function getScheme();
+    public function setScheme($scheme);
+    public function getHost();
+    public function setHost($host);
+    public function getPort();
+    public function setPort($port);
+    public function getUser();
+    public function setUser($user);
+    public function getPass();
+    public function setPass($pass);
+    public function getPath($ext = true);
+    public function setPath($path);
+    public function getQuery();
+    public function setQuery($query);
+    public function getFragment();
+    public function setFragment($fragment);
+    public function getExtension($default = null);
+    public function getSegments();
+    public function getSegment($i, $ext = true);
     public function __toString();
 
     public function linkFrom($url, $forceAbsolute = true);

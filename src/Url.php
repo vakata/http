@@ -45,114 +45,202 @@ class Url implements UrlInterface
         if (($scheme === 'http' && $port !== 80) || ($scheme === 'https' && $port !== 443)) {
             $url .= ':' . $port;
         }
-        $url .= '/' . trim($_SERVER['REQUEST_URI'], '/');
+        $url .= '/' . trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         if (strlen($_SERVER['QUERY_STRING'])) {
             $url .= '?' . $_SERVER['QUERY_STRING'];
         }
         return new self($url);
     }
     /**
-     * get the URL scheme (http, https, etc), defaults to `"http"`
-     * @method scheme
+     * Get the URL scheme (http, https, etc), defaults to `"http"`.
+     * @method getScheme
      * @return string the scheme
      */
-    public function scheme()
+    public function getScheme()
     {
         return $this->scheme;
     }
     /**
-     * get the host part of the URL (for example - google.com), defaults to `"localhost"`
-     * @method host
+     * Set the scheme.
+     * @method setScheme
+     * @param  string    $scheme the new scheme
+     * @return  self
+     */
+    public function setScheme($scheme)
+    {
+        $this->scheme = $scheme;
+        return $this;
+    }
+    /**
+     * Get the host part of the URL (for example - google.com), defaults to `"localhost"`.
+     * @method getHost
      * @return string the host
      */
-    public function host()
+    public function getHost()
     {
         return $this->host;
     }
     /**
-     * get the port, if a standart port is used this will return `null`
-     * @method port
+     * Set the host part of the URL.
+     * @method setHost
+     * @param  string  $host the new host
+     * @return  self
+     */
+    public function setHost($host)
+    {
+        $this->host = trim($host, '/');
+        return $this;
+    }
+    /**
+     * Get the port, if a standart port is used this will return `null`.
+     * @method getPort
      * @return string|null the port
      */
-    public function port()
+    public function getPort()
     {
         return $this->port;
     }
     /**
-     * get the user part of the URL (if supplied in the form scheme://user:pass@domain.tld/)
-     * @method user
+     * Set the port of the URL.
+     * @method setPort
+     * @param  string|int $port the new port
+     * @return  self
+     */
+    public function setPort($port)
+    {
+        $this->port = (string)$port;
+        return $this;
+    }
+    /**
+     * Get the user part of the URL (if supplied in the form scheme://user:pass@domain.tld/).
+     * @method getUser
      * @return string|null the username
      */
-    public function user()
+    public function getUser()
     {
         return $this->user;
     }
     /**
-     * get the password part of the URL (if supplied in the form scheme://user:pass@domain.tld/)
-     * @method pass
+     * Set the user part of the URL.
+     * @method setUser
+     * @param  string  $user the new user
+     * @return  self
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+        return $this;
+    }
+    /**
+     * Get the password part of the URL (if supplied in the form scheme://user:pass@domain.tld/).
+     * @method getPass
      * @return string|null the password
      */
-    public function pass()
+    public function getPass()
     {
         return $this->pass;
     }
     /**
-     * returns the path part of the URL
-     * @method path
-     * @param  boolean $ext should the extension (for example .html) be returned (if any), defaults to `true`
-     * @return [type]       [description]
+     * Set the password part of the URL.
+     * @method setPass
+     * @param  string  $pass the new password
+     * @return  self
      */
-    public function path($ext = true)
+    public function setPass($pass)
+    {
+        $this->pass = $pass;
+        return $this;
+    }
+    /**
+     * Returns the path part of the URL.
+     * @method getPath
+     * @param  boolean $ext should the extension (for example .html) be returned (if any), defaults to `true`
+     * @return string   the path
+     */
+    public function getPath($ext = true)
     {
         return $ext ? $this->path : preg_replace('(\.[^/.]+$)', '', $this->path);
     }
     /**
+     * Set the path part of the URL.
+     * @method setPath
+     * @param  string  $path the new path
+     * @return  self
+     */
+    public function setPath($path)
+    {
+        $this->path = '/' . trim($path, '/');
+        return $this;
+    }
+    /**
      * get the extension part of the URL (like: html, gif, jpg)
-     * @method extension
+     * @method getExtension
      * @param  string    $default the default to use if the URL does not have an extension (optional)
      * @return string|null             the extenstion
      */
-    public function extension($default = null)
+    public function getExtension($default = null)
     {
-        return strpos($this->segment(-1), '.') !== false ? preg_replace('(.*\.)', '', $this->segment(-1)) : $default;
+        return strpos($this->getSegment(-1), '.') !== false ? preg_replace('(.*\.)', '', $this->getSegment(-1)) : $default;
     }
     /**
      * get the query part of the URL (after the question mark)
-     * @method query
+     * @method getQuery
      * @return string the query
      */
-    public function query()
+    public function getQuery()
     {
         return $this->query;
     }
     /**
-     * get the fragment part of the URL (after the hash sign)
-     * @method fragment
+     * Set the query part og the URL.
+     * @method setQuery
+     * @param  string   $query the new query
+     * @return  self
+     */
+    public function setQuery($query)
+    {
+        $this->query = trim($query, '?');
+        return $this;
+    }
+    /**
+     * Get the fragment part of the URL (after the hash sign).
+     * @method getFragment
      * @return string   the fragment
      */
-    public function fragment()
+    public function getFragment()
     {
         return $this->fragment;
     }
     /**
+     * Set the fragment part of the URL
+     * @method setFragment
+     * @param  string      $fragment the new fragment
+     * @return  self
+     */
+    public function setFragment($fragment)
+    {
+        $this->fragment = trim($fragment, '#');
+        return $this;
+    }
+    /**
      * get the path part of the URL as an array (the path string exploded by `/`)
-     * @method segments
+     * @method getSegments
      * @return array   the path segments
      */
-    public function segments()
+    public function getSegments()
     {
         return array_values(array_filter(explode('/', $this->path), function ($var) { return $var !== ''; }));
     }
     /**
      * get a specific segment from the path part of the URL
-     * @method segment
+     * @method getSegment
      * @param  integer  $i  the index of the segment (can be negative too)
      * @param  boolean $ext should the extension be included (if the segment is the last one), defaults to `true`
      * @return string|null  the segment (or null if the index is invalid)
      */
-    public function segment($i, $ext = true)
+    public function getSegment($i, $ext = true)
     {
-        $segs = $this->segments();
+        $segs = $this->getSegments();
         $i = (int) $i;
         if ($i < 0) {
             $i = count($segs) + $i;
@@ -190,6 +278,12 @@ class Url implements UrlInterface
     {
         return isset($this->data[$k]) ? $this->data[$k] : null;
     }
+    public function __set($k, $v)
+    {
+        if (isset($this->data[$k])) {
+            $this->data[$k] = $v;
+        }
+    }
     /**
      * get a link from the current URL to another one
      * @method linkTo
@@ -204,21 +298,21 @@ class Url implements UrlInterface
         }
 
         $str = (string)$url;
-        if ($this->scheme !== $url->scheme()) {
+        if ($this->getScheme() !== $url->getScheme()) {
             return $str;
         }
         $str = preg_replace('(^[^/]+//)', '', $str);
-        if ($this->host !== $url->host() || $this->port !== $url->port()) {
+        if ($this->getHost() !== $url->getHost() || $this->getPort() !== $url->getPort()) {
             return '//' . $str;
         }
         $str = preg_replace('(^[^/]+)', '', $str);
-        if ($this->path !== $url->path()) {
+        if ($this->getPath() !== $url->getPath()) {
             if ($forceAbsolute) {
                 return $str;
             }
             $cnt = 0;
-            $tseg = $this->segments();
-            $useg = $url->segments();
+            $tseg = $this->getSegments();
+            $useg = $url->getSegments();
             foreach ($tseg as $k => $v) {
                 if (!isset($useg[$k]) || $useg[$k] !== $v) {
                     break;
@@ -226,19 +320,19 @@ class Url implements UrlInterface
                 $cnt ++;
             }
             $str = './' . str_repeat('../', count($useg) - $cnt) . implode('/', array_slice($useg, $cnt));
-            if ($url->query) {
-                $str .= '?' . $url->query;
+            if ($url->getQuery()) {
+                $str .= '?' . $url->getQuery();
             }
-            if ($url->fragment) {
-                $str .= '#' . $url->fragment;
+            if ($url->getFragment()) {
+                $str .= '#' . $url->getFragment();
             }
             return $str;
         }
         $str = preg_replace('(^[^?]+)', '', $str);
-        if ($this->query !== $url->query() || $url->fragment === null) {
+        if ($this->getQuery() !== $url->getQuery() || $url->getFragment() === null) {
             return $str;
         }
-        return '#' . $url->fragment;
+        return '#' . $url->getFragment();
     }
     /**
      * get a link to the current URL from another one

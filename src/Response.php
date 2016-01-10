@@ -2,6 +2,9 @@
 
 namespace vakata\http;
 
+/**
+ * A class representing an HTTP response.
+ */
 class Response extends Message implements ResponseInterface
 {
     protected $code = 200;
@@ -66,10 +69,104 @@ class Response extends Message implements ResponseInterface
         510 => 'Not Extended',                                                // RFC2774
         511 => 'Network Authentication Required',                             // RFC6585
     ];
-
-    public static function fromFile($file)
+    protected $file = null;
+    /**
+     * Create an instance from a stream resource.
+     * @method fromStream
+     * @param  stream   $stream a stream resource
+     * @param  string   $name optional name to serve the file with
+     * @return \vakata\http\Response         the response instance
+     */
+    public static function fromStream($stream, $name = null)
     {
-        // TODO: parse the file name / file size / create the body stream / etc
+        if (!$name) {
+            $meta = stream_get_meta_data($stream);
+            if (!$meta) {
+                throw new \Exception('Invalid stream');
+            }
+            $name = basename($meta['uri']);
+        }
+        if ($name) {
+            $extension = substr($name, strrpos($name, '.') + 1);
+            if ($extension) {
+                $this->setContentTypeByExtension($extension);
+            }
+            $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
+                'inline' :
+                'attachment';
+            $this->setHeader('Content-Disposition', $disposition.'; filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; filename*=UTF-8\'\''.rawurlencode($name));
+        }
+        $this->setBody($stream);
+    }
+    /**
+     * Create an instance from a file.
+     * @method fromFile
+     * @param  string   $file a path to a file
+     * @param  string   $name optional name to serve the file with
+     * @return \vakata\http\Response         the response instance
+     */
+    public static function fromFile($file, $name = null)
+    {
+        $name = $name ?: basename($file);
+        $size = filesize($file);
+        if ($name) {
+            $extension = substr($name, strrpos($name, '.') + 1);
+            if ($extension) {
+                $this->setContentTypeByExtension($extension);
+            }
+            $this->setHeader('Last-Modified', gmdate('D, d M Y H:i:s', filemtime($file)).' GMT');
+            $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
+                'inline' :
+                'attachment';
+            $this->setHeader('Content-Disposition', $disposition.'; filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; filename*=UTF-8\'\''.rawurlencode($name).'; size='.$size);
+            $this->setHeader('Content-Length', $size);
+        }
+        $this->setBody(fopen($file, 'r'));
+    }
+    /**
+     * Create an instance from an input string.
+     * @method fromString
+     * @param  string     $str the stringified response
+     * @return \vakata\http\Response          the response instance
+     */
+    public static function fromString($str)
+    {
+        $res = new self();
+        $str = str_replace(["\r\n", "\n"], ["\n", "\r\n"], $str);
+        list($headers, $message) = explode("\r\n\r\n", (string)$str, 2);
+        $headers = explode("\r\n", preg_replace("(\r\n\s+)", " ", $headers));
+        if (isset($headers[0]) && substr($headers[0], 0, 5) === 'HTTP/') {
+            $temp = explode(' ', substr($headers[0], 5));
+            $res->setProtocolVersion($temp[0]);
+            $res->setStatusCode((int)$temp[1]);
+            unset($headers[0]);
+            $headers = array_values($headers);
+        }
+        foreach (array_filter($headers) as $k => $v) {
+            $v = explode(':', $v, 2);
+            $res->setHeader(trim($v[0]), trim($v[1]));
+        }
+        $res->setBody($message);
+        $res->removeHeader('Content-Length');
+        $res->removeHeader('Transfer-Encoding');
+        return $res;
+    }
+
+    /**
+     * Add a header to the message.
+     * @method setHeader
+     * @param  string    $header the header name
+     * @param  string    $value  the header value
+     * @return  self
+     */
+    public function setHeader($header, $value)
+    {
+        $header = $this->cleanHeaderName($header);
+        $this->headers[$header] = $value;
+        if ($header === 'Status') {
+            $this->code = (int)trim($value);
+        }
+        return $this;
     }
 
     /**
@@ -90,7 +187,87 @@ class Response extends Message implements ResponseInterface
     public function setStatusCode($code)
     {
         $this->code = $code;
-        $this->setHeader('Status', self::$statusTexts[$code]);
+        $this->setHeader('Status', $code . ' ' . self::$statusTexts[$code]);
+        return $this;
+    }
+    /**
+     * Set the Content-Type header by using a file extension.
+     * @method setContentTypeByExtension
+     * @param  string                    $type the extension
+     */
+    public function setContentTypeByExtension($type) {
+        switch (mb_strtolower($type)) {
+            case "txt":
+            case "text":
+                $type = "text/plain; charset=UTF-8";
+                break;
+            case "xml":
+            case "xsl":
+                $type = "text/xml; charset=UTF-8";
+                break;
+            case "json":
+                $type = "application/json; charset=UTF-8";
+                break;
+            case "pdf":
+                $type = "application/pdf";
+                break;
+            case "exe":
+                $type = "application/octet-stream";
+                break;
+            case "zip":
+                $type = "application/zip";
+                break;
+            case "docx":
+            case "doc":
+                $type = "application/msword";
+                break;
+            case "xlsx":
+            case "xls":
+                $type = "application/vnd.ms-excel";
+                break;
+            case "ppt":
+                $type = "application/vnd.ms-powerpoint";
+                break;
+            case "gif":
+                $type = "image/gif";
+                break;
+            case "png":
+                $type = "image/png";
+                break;
+            case "mp3":
+                $type = "audio/mpeg";
+                break;
+            case "mp4":
+                $type = "video/mpeg";
+                break;
+            case "jpeg":
+            case "jpg":
+                $type = "image/jpg";
+                break;
+            case "html":
+            case "php":
+            case "htm":
+                $type = "text/html; charset=UTF-8";
+                break;
+            default:
+                return;
+        }
+        $this->setHeader('Content-Type', $type);
+    }
+    /**
+     * Make the response cacheable.
+     * @method cacheUntil
+     * @param  int|string     $expires when should the request expire - either a timestamp or strtotime expression
+     * @return self
+     */
+    public function cacheUntil($expires)
+    {
+        if (!is_int($expires)) {
+            $expires = strtotime($expires);
+        }
+        $this->setHeader('Pragma', 'public');
+        $this->setHeader('Cache-Control', 'maxage='.($expires - time()));
+        $this->setHeader('Expires', gmdate('D, d M Y H:i:s', $expires).' GMT');
         return $this;
     }
 
@@ -101,7 +278,8 @@ class Response extends Message implements ResponseInterface
      */
     public function __toString()
     {
-        $message = '';
+        $code = $this->getStatusCode();
+        $message = 'HTTP/' . $this->getProtocolVersion() . ' ' . $code . ' ' . self::$statusTexts[$code] . "\r\n";
         $headers = [];
         foreach ($this->headers as $k => $v)
         {
@@ -114,219 +292,83 @@ class Response extends Message implements ResponseInterface
     }
 
     /**
-     * send the response to the client
+     * Send the response to the client.
      * @method send
-     * @return  self
+     * @param  RequestInterface|null $req  optional request object that triggered this response
+     * @return self
      */
     public function send(RequestInterface $req = null)
     {
-        // TODO: parse stuff from $req as needed (last modified / chunks / etc)
+        $seek_beg = 0;
+        $seek_end = -1;
 
+        // modify response according to request
+        if ($req) {
+            // process cors request
+            if ($req->isCors()) {
+                $this->setHeader('Access-Control-Allow-Origin', $req->getHeader('Origin'));
+                if ($req->getMethod() === 'OPTIONS') {
+                    $this->setHeader('Access-Control-Max-Age', '3600');
+                    $this->setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,HEAD,DELETE');
+                }
+                $headers = [];
+                if ($req->hasHeader('Access-Control-Request-Headers')) {
+                    $headers = array_map('trim', array_filter(explode(',', $req->getHeader('Access-Control-Request-Headers'))));
+                }
+                $headers[] = 'Authorization';
+                $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
+            }
+            // process cached response (not modified)
+            if ($req->hasHeader('If-Modified-Since') && $this->hasHeader('Last-Modified')) {
+                $cached = strtotime($req->getHeader('If-Modified-Since'));
+                $current = strtotime($this->getHeader('Last-Modified'));
+                if ($cached === $current) {
+                    $this->setStatusCode(304);
+                }
+            }
+            // process cached response (ETag)
+            if ($req->hasHeader('If-None-Match') && $this->hasHeader('ETag')) {
+                if ($req->getHeader('If-None-Match') && $this->getHeader('ETag')) {
+                    $this->setStatusCode(304);
+                }
+            }
+            // process chunks
+            if ($req->hasHeader('Range') && $this->hasHeader('Content-Length')) {
+                $size = (int)$this->getHeader('Content-Length');
+                $range = $req->getHeader('Range');
+                $this->setHeader('Accept-Ranges', 'bytes');
+                try {
+                    if (!preg_match('@^bytes=\d*-\d*(,\d*-\d*)*$@', $range)) {
+                        throw new \Exception('Invalid range');
+                    }
+                    $range = current(explode(',', substr($range, 6)));
+                    list($seek_beg, $seek_end) = explode('-', $range, 2);
+                    $seek_beg = max((int)$seek_beg, 0);
+                    $seek_end = !(int)$seek_end ? ($size - 1) : min((int)$seek_end, ($size - 1));
+                    if ($seek_beg > $seek_end) {
+                        throw new \Exception('Invalid range');
+                    }
+                    $this->setStatusCode(206);
+                    $this->setHeader('Content-Range', 'bytes '.$seek_beg.'-'.$seek_end.'/'.$size);
+                    $seek_end = ($seek_end - $seek_beg);
+                } catch (\Exception $e) {
+                    $this->setStatusCode(416);
+                    $this->setHeader('Content-Range', 'bytes * /'.$size);
+                    $this->body = null;
+                }
+            }
+        }
         if (!headers_sent()) {
             http_response_code($this->code);
             foreach ($this->getHeaders() as $k => $v) {
                 header($k . ': ' . $v);
             }
         }
-        if ($this->body) {
-            $out = fopen('php://output');
-            stream_copy_to_stream($this->body, $out);
+        if ($this->body && (!in_array($this->getStatusCode(), [204,304,416])) && (!$req || $req->getMethod() !== 'HEAD')) {
+            $out = fopen('php://output', 'w');
+            stream_copy_to_stream($this->body, $out, $seek_end, $seek_beg);
             fclose($out);
         }
+        return $this;
     }
 }
-
-/*
-protected $http = '1.1';
-protected $code = 200;
-protected $head = [];
-protected $body = null;
-protected $gzip = true;
-
-protected $filters = [];
-
-public function __construct()
-{
-    ob_start();
-}
-
-protected function processBody()
-{
-    if ($this->body === null) {
-        $this->body = ob_get_clean();
-    }
-    while (ob_get_level() && ob_end_clean());
-
-    // above headers, so that filters can send headers
-    if ($this->body !== null && strlen($this->body)) {
-        $type = explode(';', $this->getHeader('Content-Type'))[0];
-        foreach ($this->filters as $filter) {
-            $this->body = call_user_func($filter, $this->body, $type);
-        }
-    }
-}
-
-public function enableCors(RequestInterface $req, array $methods = null)
-{
-    if (!$req->isCors()) {
-        return;
-    }
-    if (!$methods) {
-        $methods = ['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE'];
-    }
-    $this->setHeader('Access-Control-Allow-Origin', $req->getHeader('Origin'));
-    $headers = [];
-    if ($req->hasHeader('Access-Control-Request-Headers')) {
-        $headers = array_map('trim', array_filter(explode(',', $req->getHeader('Access-Control-Request-Headers'))));
-    }
-    $headers[] = 'Authorization';
-    $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
-    if ($req->getMethod() === 'OPTIONS') {
-        $this->setHeader('Access-Control-Max-Age', '3600');
-        $this->setHeader('Access-Control-Allow-Methods', implode(', ', $methods));
-    }
-}
-
-public function file(\vakata\file\FileInterface $file, $file_name = null, $chunks = false, $head_only = false)
-{
-    $extension = $file_name ? substr($file_name, strrpos($file_name, '.') + 1) : $file->extension;
-    $file_name = $file_name ?: $file->name;
-    $location = $file->location;
-    $file_beg = 0;
-    $file_end = $file->size ? $file->size : null;
-
-    $this->setGzip(false);
-    $this->body = null;
-    $this->head = [];
-
-    $expires = 60 * 60 * 24 * 30; // 1 месец
-    if ($file->modified) {
-        $this->setHeader('Last-Modified', gmdate('D, d M Y H:i:s', $file->modified).' GMT');
-    }
-    if ($file->hash) {
-        $this->setHeader('Etag', $file->hash);
-    }
-    $this->setHeader('Pragma', 'public');
-    $this->setHeader('Cache-Control', 'maxage='.$expires);
-    $this->setHeader('Expires', gmdate('D, d M Y H:i:s', time() + $expires).' GMT');
-
-    $modified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? $_SERVER['HTTP_IF_MODIFIED_SINCE'] : getenv('HTTP_IF_MODIFIED_SINCE');
-    $hash = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : getenv('HTTP_IF_NONE_MATCH');
-
-    // ако клиента има кеширано копие пускаме 304 и не качваме брояча за downloaded
-    $cached = false;
-    if (
-        ($file->modified && $modified && @strtotime($modified) == $file->modified) ||
-        ($file->hash && $hash && $hash == $file->hash)
-    ) {
-        $this->setStatusCode(304);
-        $cached = true;
-    } else {
-        // ако получаваме заявка за чънкове (resume/chunk поддръжка чрез HTTP_RANGE)
-        // но само ако имаме размера
-        if ($chunks && $file->size && $location && isset($_SERVER['HTTP_RANGE'])) {
-            $this->setHeader('Accept-Ranges', 'bytes');
-            if (!preg_match('@^bytes=\d*-\d*(,\d*-\d*)*$@', $_SERVER['HTTP_RANGE'])) {
-                $this->setStatusCode(416);
-                $this->setHeader('Content-Range', 'bytes * /'.$file->size);
-                $location = null;
-            } else {
-                $range = current(explode(',', substr($_SERVER['HTTP_RANGE'], 6)));
-                list($seek_beg, $seek_end) = explode('-', $range, 2);
-                $seek_beg = max((int) $seek_beg, 0);
-                $seek_end = !(int) $seek_end ? ((int) $file->size - 1) : min((int) $seek_end, ((int) $file->size - 1));
-                if ($seek_beg > $seek_end) {
-                    $this->setStatusCode(416);
-                    $this->setHeader('Content-Range', 'bytes * /'.$file->size);
-                    $location = null;
-                } else {
-                    $this->setStatusCode(206);
-                    $this->setHeader('Content-Range', 'bytes '.$seek_beg.'-'.$seek_end.'/'.$file->size);
-                    $file_beg = $seek_beg;
-                    $file_end = ($seek_end - $seek_beg);
-                }
-            }
-        } else {
-            $chunks = false;
-            $this->setStatusCode(200);
-        }
-    }
-    $this->setContentType($extension);
-    if (!$this->hasHeader('Content-Type')) {
-        $this->setHeader('Content-Type', 'application/octet-stream');
-    }
-    $this->setHeader('Content-Disposition', (!$chunks && in_array(strtolower($extension), array('txt', 'png', 'jpg', 'gif', 'jpeg', 'html', 'htm', 'mp3', 'mp4')) ? 'inline' : 'attachment').'; filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $file_name).'"; filename*=UTF-8\'\''.rawurlencode($file_name).''.($file->size ? '; size='.$file->size : ''));
-    if ($file_end) {
-        $this->setHeader('Content-Length', $file_end);
-    }
-
-    session_write_close();
-    while (ob_get_level() && ob_end_clean());
-
-    if (!headers_sent()) {
-        http_response_code($this->code);
-        foreach ($this->head as $key => $header) {
-            header($key.': '.$header);
-        }
-    }
-
-    if (!$cached && !$head_only) {
-        if ($location && strpos($location, 'http') !== 0 && ($fp = @fopen($location, 'rb'))) {
-            set_time_limit(0);
-            ob_implicit_flush(true);
-            @ob_end_flush();
-
-            fseek($fp, $file_beg);
-            $chunk = 1024 * 8;
-            $read = 0;
-            while (!feof($fp) && $read <= $file_end) {
-                echo fread($fp, $chunk);
-                $read += $chunk;
-                if ($file_end - $read < $chunk) {
-                    $chunk = $file_end - $read;
-                }
-                if (!$chunk) {
-                    break;
-                }
-            }
-            @fclose($fp);
-        } else {
-            echo $file->content();
-        }
-    }
-    @ob_end_flush();
-    $this->body = null;
-    $this->head = [];
-}
-
-public function send()
-{
-    if (!$this->hasHeader('Content-Type')) {
-        $this->setContentType('html');
-    }
-    $this->processBody();
-
-    if (!headers_sent()) {
-        http_response_code($this->code);
-        foreach ($this->head as $key => $header) {
-            header($key.': '.$header);
-        }
-    }
-    if ($this->body !== null && strlen($this->body)) {
-        if ($this->gzip && !(bool) @ini_get('zlib.output_compression') && extension_loaded('zlib')) {
-            ob_start('ob_gzhandler');
-        }
-        echo $this->body;
-    }
-    $this->body = null;
-    $this->head = [];
-    @ob_end_flush();
-}
-
-public function __sleep()
-{
-    $this->processBody();
-
-    return ['http','code','head','body','gzip'];
-}
-*/

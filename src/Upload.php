@@ -3,11 +3,12 @@ namespace vakata\http;
 /**
  * A class representing uploaded files in an HTML multipart request.
  */
-class Upload
+class Upload implements UploadInterface
 {
     protected $name = '';
     protected $body = null;
     protected $path = null;
+    protected $size = null;
 
     /**
      * Create an instance
@@ -41,6 +42,35 @@ class Upload
         }
         $upload = new self($_FILES[$key]['name'], $_FILES[$key]['tmp_name']);
         return $upload;
+    }
+    /**
+     * Returns whether the upload has a defined size.
+     * @method hasSize
+     * @return boolean  whether the upload has a defined size
+     */
+    public function hasSize()
+    {
+        return $this->size !== null;
+    }
+    /**
+     * Get the size of the file.
+     * @method getSize
+     * @return string  the size in bytes
+     */
+    public function getSize()
+    {
+        return (int)$this->size;
+    }
+    /**
+     * Set the file size.
+     * @method setSize
+     * @param  string  $size the size
+     * @return  self
+     */
+    public function setSize($size)
+    {
+        $this->size = (int)$size;
+        return $this;
     }
     /**
      * Get the name of the file.
@@ -85,9 +115,18 @@ class Upload
             if (!$temp) {
                 throw new \Exception('Can not open path');
             }
-            $this->setBody($temp);
+            $size = @filesize($this->path);
+            if ($size !== false) {
+                $this->setSize($size);
+            }
+            if ($this->name === '') {
+                $this->name = basename($path);
+            }
+            $this->body = $temp;
         } catch (\Exception $e) {
-            $this->setBody(null);
+            $this->size = null;
+            $this->path = null;
+            $this->body = null;
         }
         return $this;
     }
@@ -117,10 +156,13 @@ class Upload
         if (is_string($body)) {
             $this->path = null;
             $this->body = fopen('php://temp', 'r+');
-            fwrite($this->body, $body);
+            $size = fwrite($this->body, $body);
+            $this->setSize($size);
             rewind($this->body);
         }
         else {
+            $this->size = null;
+            $this->path = null;
             $this->body = $body;
         }
         return $this;
