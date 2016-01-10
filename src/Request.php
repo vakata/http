@@ -7,7 +7,18 @@ class Request extends Message implements RequestInterface
     protected $method = 'GET';
     protected $files = [];
     protected $url = null;
-    protected $protocol = '1.1';
+
+    /**
+     * Create an instance.
+     * @method __construct
+     * @param  string      $method the method for the request
+     * @param  string      $url    the URL for the request
+     */
+    public function __construct($method = 'GET', $url = null)
+    {
+        $this->setMethod($method);
+        $this->setUrl($url);
+    }
 
     /**
      * create a request instance from the current user request
@@ -247,7 +258,7 @@ class Request extends Message implements RequestInterface
         if (!$this->hasHeader('Authorization')) {
             return null;
         }
-        $temp = explode(' ', $this->getHeader('Authorization'));
+        $temp = explode(' ', trim($this->getHeader('Authorization')), 2);
         switch (strtolower($temp[0])) {
             case 'basic':
                 $temp[1] = base64_decode($temp[1]);
@@ -295,15 +306,15 @@ class Request extends Message implements RequestInterface
      * @param  string                    $default the default value to return if the Accept header is not present.
      * @return string                    the desired response format
      */
-    public function getPreferedResponseFormat($default = 'html')
+    public function getPreferedResponseFormat($default = 'text/html')
     {
         // parse accept header (uses default instead of 406 header)
-        $acpt = $this->getHeader('Accept') ?: 'application/'.$default;
+        $acpt = $this->getHeader('Accept') ?: $default;
         $acpt = explode(',', $acpt);
         foreach ($acpt as $k => $v) {
             $v = array_pad(explode(';', $v, 2), 2, 'q=1');
             $v[1] = (float) array_pad(explode('q=', $v[1], 2), 2, '1')[1];
-            $v[0] = explode('+', array_pad(explode('/', $v[0], 2), 2, 'json')[1])[0];
+            $v[0] = $v[0];
             $v[2] = $k;
             $acpt[$k] = $v;
         }
@@ -388,7 +399,7 @@ class Request extends Message implements RequestInterface
     public function getCookie($key = null, $default = null, $mode = null)
     {
         if (!$this->hasHeader('Cookie')) {
-            return $key === null ? [] : null;
+            return $key === null ? [] : $default;
         }
         $data = explode(';', $this->getHeader('Cookie'));
         $real = [];
@@ -409,7 +420,7 @@ class Request extends Message implements RequestInterface
     public function getQuery($key = null, $default = null, $mode = null)
     {
         if (!$this->url) {
-            return $key === null ? [] : null;
+            return $key === null ? [] : $default;
         }
         $data = [];
         parse_str($this->url->getQuery(), $data);
@@ -427,7 +438,7 @@ class Request extends Message implements RequestInterface
     {
         $data = $this->getBody(true);
         if (!$data) {
-            return $key === null ? [] : null;
+            return $key === null ? [] : $default;
         }
         $real = [];
         if ($this->hasHeader('Content-Type') && strpos($this->getHeader('Content-Type'), 'json') !== false) {

@@ -141,9 +141,13 @@ class Upload implements UploadInterface
         if (!$this->body) {
             return $asString ? '' : null;
         }
-        $body = $asString ? stream_get_contents($this->body) : $this->body;
-        rewind($this->body);
-        return $body;
+        if ($asString) {
+            @rewind($this->body);
+            $body = stream_get_contents($this->body);
+            @rewind($this->body);
+            return $body;
+        }
+        return $this->body;
     }
     /**
      * Set the upload file body (either set to a stream resource or a string).

@@ -280,7 +280,7 @@ class Url implements UrlInterface
     }
     public function __set($k, $v)
     {
-        if (isset($this->data[$k])) {
+        if (array_key_exists($k, $this->data)) {
             $this->data[$k] = $v;
         }
     }

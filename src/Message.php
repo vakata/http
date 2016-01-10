@@ -119,8 +119,9 @@ abstract class Message implements MessageInterface
         if (!$this->body) {
             return $asString ? '' : null;
         }
+        @rewind($this->body);
         $body = $asString ? stream_get_contents($this->body) : $this->body;
-        rewind($this->body);
+        @rewind($this->body);
         return $body;
     }
     /**

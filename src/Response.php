@@ -69,7 +69,17 @@ class Response extends Message implements ResponseInterface
         510 => 'Not Extended',                                                // RFC2774
         511 => 'Network Authentication Required',                             // RFC6585
     ];
-    protected $file = null;
+
+    /**
+     * Create an instance.
+     * @method __construct
+     * @param  integer      $status the status code to use
+     */
+    public function __construct($status = 200)
+    {
+        $this->setStatusCode($status);
+    }
+
     /**
      * Create an instance from a stream resource.
      * @method fromStream
@@ -194,6 +204,7 @@ class Response extends Message implements ResponseInterface
      * Set the Content-Type header by using a file extension.
      * @method setContentTypeByExtension
      * @param  string                    $type the extension
+     * @return  self
      */
     public function setContentTypeByExtension($type) {
         switch (mb_strtolower($type)) {
@@ -253,6 +264,7 @@ class Response extends Message implements ResponseInterface
                 return;
         }
         $this->setHeader('Content-Type', $type);
+        return $this;
     }
     /**
      * Make the response cacheable.
