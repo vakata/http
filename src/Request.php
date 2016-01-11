@@ -24,6 +24,7 @@ class Request extends Message implements RequestInterface
      * create a request instance from the current user request
      * @method fromRequest
      * @return \vakata\http\Request      the instance
+     * @codeCoverageIgnore
      */
     public static function fromRequest()
     {
@@ -62,6 +63,7 @@ class Request extends Message implements RequestInterface
      * @method fromString
      * @param  string     $str the stringified request
      * @return \vakata\http\Request          the request instance
+     * @codeCoverageIgnore
      */
     public static function fromString($str)
     {
@@ -477,6 +479,7 @@ class Request extends Message implements RequestInterface
      * get the entire request as a string
      * @method __toString
      * @return string     the messsage
+     * @codeCoverageIgnore
      */
     public function __toString()
     {
@@ -530,6 +533,7 @@ class Request extends Message implements RequestInterface
      * @param  string      $field the POST key name, defaults to `checksum`
      * @param  string      $algo  the algorythm to use, defaults to `sha1`
      * @return  self
+     * @codeCoverageIgnore
      */
     public function addChecksum($key, $field = 'checksum', $algo = 'sha1')
     {
@@ -545,6 +549,7 @@ class Request extends Message implements RequestInterface
      * @param  string           $field the POST field name, defaults to `checksum`
      * @param  string           $algo  the algorithm to use, defaults to `sha1`
      * @return boolean          is the checksum valid
+     * @codeCoverageIgnore
      */
     public function validateChecksum($key, $field = 'checksum', $algo = 'sha1')
     {
@@ -555,6 +560,7 @@ class Request extends Message implements RequestInterface
      * Send the request.
      * @method send
      * @return \vakata\http\Response the response.
+     * @codeCoverageIgnore
      */
     public function send()
     {

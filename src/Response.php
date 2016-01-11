@@ -86,6 +86,7 @@ class Response extends Message implements ResponseInterface
      * @param  stream   $stream a stream resource
      * @param  string   $name optional name to serve the file with
      * @return \vakata\http\Response         the response instance
+     * @codeCoverageIgnore
      */
     public static function fromStream($stream, $name = null)
     {
@@ -114,6 +115,7 @@ class Response extends Message implements ResponseInterface
      * @param  string   $file a path to a file
      * @param  string   $name optional name to serve the file with
      * @return \vakata\http\Response         the response instance
+     * @codeCoverageIgnore
      */
     public static function fromFile($file, $name = null)
     {
@@ -146,6 +148,7 @@ class Response extends Message implements ResponseInterface
      * @method fromString
      * @param  string     $str the stringified response
      * @return \vakata\http\Response          the response instance
+     * @codeCoverageIgnore
      */
     public static function fromString($str)
     {
@@ -296,6 +299,7 @@ class Response extends Message implements ResponseInterface
      * get the entire response as a string
      * @method __toString
      * @return string     the messsage
+     * @codeCoverageIgnore
      */
     public function __toString()
     {
@@ -316,6 +320,7 @@ class Response extends Message implements ResponseInterface
      * @method send
      * @param  RequestInterface|null $req  optional request object that triggered this response
      * @return self
+     * @codeCoverageIgnore
      */
     public function send(RequestInterface $req = null)
     {

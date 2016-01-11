@@ -35,6 +35,7 @@ class Upload implements UploadInterface
      * @method fromRequest
      * @param  string      $key the key in the $_FILES array
      * @return Upload           the instance
+     * @codeCoverageIgnore
      */
     public static function fromRequest($key)
     {

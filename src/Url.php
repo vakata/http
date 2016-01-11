@@ -36,6 +36,7 @@ class Url implements UrlInterface
      * Create an instance from the current request.
      * @method fromRequest
      * @return vakata\http\Url  the URL instance of the current request
+     * @codeCoverageIgnore
      */
     public static function fromRequest()
     {
