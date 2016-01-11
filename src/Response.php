@@ -105,7 +105,14 @@ class Response extends Message implements ResponseInterface
             $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
                 'inline' :
                 'attachment';
-            $this->setHeader('Content-Disposition', $disposition.'; filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; filename*=UTF-8\'\''.rawurlencode($name));
+            $this->setHeader(
+                'Content-Disposition',
+                (
+                    $disposition.'; '.
+                    'filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; '.
+                    'filename*=UTF-8\'\''.rawurlencode($name)
+                )
+            );
         }
         $this->setBody($stream);
     }
@@ -216,6 +223,7 @@ class Response extends Message implements ResponseInterface
      * @method setContentTypeByExtension
      * @param  string                    $type the extension
      * @return  self
+     * @codeCoverageIgnore
      */
     public function setContentTypeByExtension($type)
     {

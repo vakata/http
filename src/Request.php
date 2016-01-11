@@ -580,6 +580,9 @@ class Request extends Message implements RequestInterface
 
         return $lengthAvailable ? $this->sendAsStream() : $this->sendAsString();
     }
+    /**
+     * @codeCoverageIgnore
+     */
     protected function sendAsString()
     {
         $bndr = 'multipart-boundary-'.md5(microtime());
@@ -627,6 +630,9 @@ class Request extends Message implements RequestInterface
         fclose($resp);
         return \vakata\http\Response::fromString($head . "\r\n\r\n" . $body);
     }
+    /**
+     * @codeCoverageIgnore
+     */
     protected function sendAsStream()
     {
         $bndr = 'multipart-boundary-'.md5(microtime());
