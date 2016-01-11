@@ -180,7 +180,9 @@ class Url implements UrlInterface
      */
     public function getExtension($default = null)
     {
-        return strpos($this->getSegment(-1), '.') !== false ? preg_replace('(.*\.)', '', $this->getSegment(-1)) : $default;
+        return strpos($this->getSegment(-1), '.') !== false ?
+            preg_replace('(.*\.)', '', $this->getSegment(-1)) :
+            $default;
     }
     /**
      * get the query part of the URL (after the question mark)
@@ -229,7 +231,14 @@ class Url implements UrlInterface
      */
     public function getSegments()
     {
-        return array_values(array_filter(explode('/', $this->path), function ($var) { return $var !== ''; }));
+        return array_values(
+            array_filter(
+                explode('/', $this->path),
+                function ($var) {
+                    return $var !== '';
+                }
+            )
+        );
     }
     /**
      * get a specific segment from the path part of the URL

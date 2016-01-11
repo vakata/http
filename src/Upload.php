@@ -1,5 +1,6 @@
 <?php
 namespace vakata\http;
+
 /**
  * A class representing uploaded files in an HTML multipart request.
  */
@@ -163,8 +164,7 @@ class Upload implements UploadInterface
             $size = fwrite($this->body, $body);
             $this->setSize($size);
             rewind($this->body);
-        }
-        else {
+        } else {
             $this->size = null;
             $this->path = null;
             $this->body = $body;

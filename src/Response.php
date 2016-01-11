@@ -128,7 +128,15 @@ class Response extends Message implements ResponseInterface
             $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
                 'inline' :
                 'attachment';
-            $this->setHeader('Content-Disposition', $disposition.'; filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; filename*=UTF-8\'\''.rawurlencode($name).'; size='.$size);
+            $this->setHeader(
+                'Content-Disposition',
+                (
+                    $disposition.'; '.
+                    'filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; '.
+                    'filename*=UTF-8\'\''.rawurlencode($name).'; '.
+                    'size='.$size
+                )
+            );
             $this->setHeader('Content-Length', $size);
         }
         $this->setBody(fopen($file, 'r'));
@@ -152,7 +160,7 @@ class Response extends Message implements ResponseInterface
             unset($headers[0]);
             $headers = array_values($headers);
         }
-        foreach (array_filter($headers) as $k => $v) {
+        foreach (array_filter($headers) as $v) {
             $v = explode(':', $v, 2);
             $res->setHeader(trim($v[0]), trim($v[1]));
         }
@@ -206,7 +214,8 @@ class Response extends Message implements ResponseInterface
      * @param  string                    $type the extension
      * @return  self
      */
-    public function setContentTypeByExtension($type) {
+    public function setContentTypeByExtension($type)
+    {
         switch (mb_strtolower($type)) {
             case "txt":
             case "text":
@@ -293,8 +302,7 @@ class Response extends Message implements ResponseInterface
         $code = $this->getStatusCode();
         $message = 'HTTP/' . $this->getProtocolVersion() . ' ' . $code . ' ' . self::$statusTexts[$code] . "\r\n";
         $headers = [];
-        foreach ($this->headers as $k => $v)
-        {
+        foreach ($this->headers as $k => $v) {
             $headers[] = $k . ': ' . $v;
         }
         $message .= implode("\r\n", $headers);
@@ -311,8 +319,8 @@ class Response extends Message implements ResponseInterface
      */
     public function send(RequestInterface $req = null)
     {
-        $seek_beg = 0;
-        $seek_end = -1;
+        $seekBeg = 0;
+        $seekEnd = -1;
 
         // modify response according to request
         if ($req) {
@@ -325,7 +333,10 @@ class Response extends Message implements ResponseInterface
                 }
                 $headers = [];
                 if ($req->hasHeader('Access-Control-Request-Headers')) {
-                    $headers = array_map('trim', array_filter(explode(',', $req->getHeader('Access-Control-Request-Headers'))));
+                    $headers = array_map(
+                        'trim',
+                        array_filter(explode(',', $req->getHeader('Access-Control-Request-Headers')))
+                    );
                 }
                 $headers[] = 'Authorization';
                 $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
@@ -354,15 +365,15 @@ class Response extends Message implements ResponseInterface
                         throw new \Exception('Invalid range');
                     }
                     $range = current(explode(',', substr($range, 6)));
-                    list($seek_beg, $seek_end) = explode('-', $range, 2);
-                    $seek_beg = max((int)$seek_beg, 0);
-                    $seek_end = !(int)$seek_end ? ($size - 1) : min((int)$seek_end, ($size - 1));
-                    if ($seek_beg > $seek_end) {
+                    list($seekBeg, $seekEnd) = explode('-', $range, 2);
+                    $seekBeg = max((int)$seekBeg, 0);
+                    $seekEnd = !(int)$seekEnd ? ($size - 1) : min((int)$seekEnd, ($size - 1));
+                    if ($seekBeg > $seekEnd) {
                         throw new \Exception('Invalid range');
                     }
                     $this->setStatusCode(206);
-                    $this->setHeader('Content-Range', 'bytes '.$seek_beg.'-'.$seek_end.'/'.$size);
-                    $seek_end = ($seek_end - $seek_beg);
+                    $this->setHeader('Content-Range', 'bytes '.$seekBeg.'-'.$seekEnd.'/'.$size);
+                    $seekEnd = ($seekEnd - $seekBeg);
                 } catch (\Exception $e) {
                     $this->setStatusCode(416);
                     $this->setHeader('Content-Range', 'bytes * /'.$size);
@@ -378,7 +389,7 @@ class Response extends Message implements ResponseInterface
         }
         if ($this->body && (!in_array($this->getStatusCode(), [204,304,416])) && (!$req || $req->getMethod() !== 'HEAD')) {
             $out = fopen('php://output', 'w');
-            stream_copy_to_stream($this->body, $out, $seek_end, $seek_beg);
+            stream_copy_to_stream($this->body, $out, $seekEnd, $seekBeg);
             fclose($out);
         }
         return $this;

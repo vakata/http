@@ -52,7 +52,7 @@ class Request extends Message implements RequestInterface
         $req->setBody(file_get_contents('php://input'));
 
         if (isset($_FILES) && count($_FILES)) {
-            foreach ($_FILES as $k => $v) {
+            foreach (array_keys($_FILES) as $k) {
                 $req->addUpload($k, Upload::fromRequest($k));
             }
         }
@@ -81,7 +81,7 @@ class Request extends Message implements RequestInterface
                 $headers = array_values($headers);
             }
         }
-        foreach (array_filter($headers) as $k => $v) {
+        foreach (array_filter($headers) as $v) {
             $v = explode(':', $v, 2);
             $req->setHeader(trim($v[0]), trim($v[1]));
         }
@@ -94,7 +94,7 @@ class Request extends Message implements RequestInterface
         }
 
         if (strpos($req->getHeader('Content-Type'), 'multipart') !== false) {
-            $bndr = trim(explode(' boundary=', $req->getHeader('Content-Type'))[1],'"');
+            $bndr = trim(explode(' boundary=', $req->getHeader('Content-Type'))[1], '"');
             $parts = explode("\r\n" . '--' . $bndr, "\r\n" . $message);
             array_pop($parts);
             array_shift($parts);
@@ -125,8 +125,7 @@ class Request extends Message implements RequestInterface
                 }
             }
             $req->setBody(http_build_query($post));
-        }
-        else if (strlen($message)) {
+        } elseif (strlen($message)) {
             $req->setBody($message);
         }
         $req->removeHeader('Content-Length');
@@ -243,7 +242,8 @@ class Request extends Message implements RequestInterface
      * @method removeUploads
      * @return self
      */
-    public function removeUploads() {
+    public function removeUploads()
+    {
         $this->files = [];
         return $this;
     }
@@ -354,7 +354,7 @@ class Request extends Message implements RequestInterface
         // remove non-printable chars
         do {
             $count = 0;
-            $value = preg_replace(array('/%0[0-8bcef]/', '/%1[0-9a-f]/', '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S'), '', $value, -1, $count);
+            $value = preg_replace(['/%0[0-8bcef]/', '/%1[0-9a-f]/', '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S'], '', $value, -1, $count);
         } while ($count);
 
         switch ($mode) {
@@ -443,8 +443,7 @@ class Request extends Message implements RequestInterface
         $real = [];
         if ($this->hasHeader('Content-Type') && strpos($this->getHeader('Content-Type'), 'json') !== false) {
             $real = json_decode($data, true);
-        }
-        else {
+        } else {
             parse_str($data, $real);
         }
         return $this->getValue($real, $key, $default, $mode);
@@ -519,8 +518,7 @@ class Request extends Message implements RequestInterface
                 $message .= $file->getBody(true) . "\r\n";
             }
             $message .= '--' . $bndr . '--' . "\r\n\r\n";
-        }
-        else {
+        } else {
             $message .= $this->getBody(true);
         }
         return $message;
@@ -606,13 +604,13 @@ class Request extends Message implements RequestInterface
                 }
                 foreach ($this->getUploads() as $key => $file) {
                     $message .= '--' . $bndr . "\r\n";
-                    $message .= 'Content-Disposition: form-data; name="'.$key.'"; filename="'.$file->getName().'"' . "\r\n";
+                    $message .= 'Content-Disposition: form-data; name="'.$key.'"; filename="'.$file->getName().'"';
+                    $message .= "\r\n";
                     $message .= 'Content-Transfer-Encoding: binary' . "\r\n\r\n";
                     $message .= $file->getBody(true) . "\r\n";
                 }
                 $message .= '--' . $bndr . '--';
-            }
-            else {
+            } else {
                 $message .= $this->getBody(true);
             }
             $context['http']['content'] = $message;
@@ -634,12 +632,11 @@ class Request extends Message implements RequestInterface
                     $length += strlen($bndr) + 4 + 41 + strlen($k) + 41 + 35 + strlen($v) + 2;
                 }
                 foreach ($this->getUploads() as $key => $file) {
-                    $length += strlen($bndr) + 4 + 54 + strlen($key) + strlen($file->getName()) + 37 + $file->getSize() + 2;
+                    $length += strlen($bndr) + 58 + strlen($key) + strlen($file->getName()) + 37 + $file->getSize() + 2;
                 }
                 $length += strlen($bndr) + 4;
                 $this->setHeader('Content-Length', $length);
-            }
-            else {
+            } else {
                 $body = $this->getBody(true);
                 $this->setHeader('Content-Length', strlen($body));
             }
@@ -665,10 +662,8 @@ class Request extends Message implements RequestInterface
         $line .= ' HTTP/' . $this->getProtocolVersion();
         $line .= "\r\n";
         fwrite($resp, $line);
-
         // headers
         fwrite($resp, implode("\r\n", $headers) . "\r\n\r\n");
-
         // body
         if ($this->getBody() || $this->hasUploads()) {
             if ($this->hasUploads()) {
@@ -688,8 +683,7 @@ class Request extends Message implements RequestInterface
                 }
                 fwrite($resp, '--' . $bndr . '--');
                 fwrite($resp, str_repeat(' ', 100));
-            }
-            else {
+            } else {
                 stream_copy_to_stream($this->getBody(), $resp);
             }
         }
@@ -730,7 +724,8 @@ class Request extends Message implements RequestInterface
 public function checkCSRF()
 {
     // csrf (allow for AJAX & CORS)
-    // ajax may not be secure: http://lists.webappsec.org/pipermail/websecurity_lists.webappsec.org/2011-February/007533.html
+    // ajax may not be secure:
+    //      http://lists.webappsec.org/pipermail/websecurity_lists.webappsec.org/2011-February/007533.html
     if (!$this->isAjax() && !$this->hasHeader('Origin')) {
         if (isset($_SESSION['_csrf_token']) && isset($_POST) && count($_POST) > 0) {
             if (!isset($_POST['_csrf_token']) || $_POST['_csrf_token'] != $_SESSION['_csrf_token']) {

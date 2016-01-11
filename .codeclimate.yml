@@ -19,6 +19,8 @@ engines:
         enabled: false
       Design/NpathComplexity:
         enabled: false
+      CleanCode/StaticAccess:
+        enabled: false
 ratings:
   paths:
   - "**.php"

@@ -136,8 +136,7 @@ abstract class Message implements MessageInterface
             $this->body = fopen('php://temp', 'r+');
             fwrite($this->body, $body);
             rewind($this->body);
-        }
-        else {
+        } else {
             $this->body = $body;
         }
         return $this;
