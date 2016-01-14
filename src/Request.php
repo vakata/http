@@ -57,6 +57,8 @@ class Request extends Message implements RequestInterface
                 $req->addUpload($k, Upload::fromRequest($k));
             }
         }
+
+        return $req;
     }
     /**
      * Create an instance from a stringified request.
