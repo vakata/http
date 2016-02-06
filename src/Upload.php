@@ -24,7 +24,7 @@ class Upload implements UploadInterface
             $this->setName($name);
         }
         if ($path) {
-            $this->setPath($name);
+            $this->setPath($path);
         }
         if ($body) {
             $this->setBody($body);
