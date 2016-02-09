@@ -46,11 +46,15 @@ class Request extends Message implements RequestInterface
                 $headers[$key] = $val;
             }
         }
+
         foreach ($headers as $key => $value) {
             $req->setHeader($key, $value);
         }
-
-        $req->setBody(file_get_contents('php://input'));
+        if (strpos(strtolower($req->getHeader('Content-Type')), 'multipart/') === 0) {
+            $req->setBody(http_build_query($_POST));
+        } else {
+            $req->setBody(file_get_contents('php://input'));
+        }
 
         if (isset($_FILES) && count($_FILES)) {
             foreach (array_keys($_FILES) as $k) {

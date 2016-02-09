@@ -13,4 +13,5 @@ interface UploadInterface
     public function getSize();
     public function setSize($size);
     public function saveAs($dest);
+    public function appendTo($dest);
 }

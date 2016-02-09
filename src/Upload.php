@@ -199,4 +199,36 @@ class Upload implements UploadInterface
         }
         return false;
     }
+    /**
+     * Append the file to a location.
+     * @method appendTo
+     * @param  string $dest the destination (a file system path)
+     * @return bool       was the file saved
+     */
+    public function appendTo($dest)
+    {
+        if ($this->body) {
+            try {
+                $out = fopen($dest, 'a');
+                stream_copy_to_stream($this->body, $out);
+                fclose($out);
+                return true;
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+        if ($this->path) {
+            if (is_uploaded_file($this->path)) {
+                if (!move_uploaded_file($this->path, $dest . '_')) {
+                    return false;
+                }
+                $temp = file_get_contents($dest . '_');
+                unlink($dest . '_');
+            } else {
+                $temp = file_get_contents($this->path);
+            }
+            return $temp !== false && file_put_contents($dest, $temp, FILE_APPEND) > 0;
+        }
+        return false;
+    }
 }
