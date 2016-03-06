@@ -179,6 +179,7 @@ class Request extends Message implements RequestInterface
      * Get the user agent from the request.
      * @method userAgentFromRequest
      * @return string               the user agent
+     * @codeCoverageIgnore
      */
     public static function userAgentFromRequest() {
         return isset($_SERVER) && isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
