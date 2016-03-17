@@ -29,6 +29,9 @@ A class representing an URL
 |[__toString](#vakata\http\url__tostring)|get the entire URL back as a string|
 |[linkTo](#vakata\http\urllinkto)|get a link from the current URL to another one|
 |[linkFrom](#vakata\http\urllinkfrom)|get a link to the current URL from another one|
+|[append](#vakata\http\urlappend)|append new segments to the current path|
+|[getParam](#vakata\http\urlgetparam)|get a parameter from the URL|
+|[setParam](#vakata\http\urlsetparam)|set a query param on the URL|
 
 ---
 
@@ -458,6 +461,65 @@ public function linkFrom (
 | `$forceAbsolute` | `boolean` | should an absolute path be used, defaults to `true` |
 |  |  |  |
 | `return` | `string` | the link |
+
+---
+
+
+### vakata\http\Url::append
+append new segments to the current path  
+
+
+```php
+public function append (  
+    array|string $segments  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$segments` | `array`, `string` | the URL segments to append |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Url::getParam
+get a parameter from the URL  
+
+
+```php
+public function getParam (  
+    string $key,  
+    mixed $default  
+) : mixed    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$key` | `string` | the name of the parameter |
+| `$default` | `mixed` | the default value to return if the parameter is not found (defaults to `null`) |
+|  |  |  |
+| `return` | `mixed` | the value of the parameter (or the default value) |
+
+---
+
+
+### vakata\http\Url::setParam
+set a query param on the URL  
+
+
+```php
+public function setParam (  
+    string $key,  
+    mixed $value  
+)   
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$key` | `string` | the param name |
+| `$value` | `mixed` | the param value |
 
 ---
 

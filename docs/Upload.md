@@ -17,6 +17,7 @@ A class representing uploaded files in an HTML multipart request.
 |[getBody](#vakata\http\uploadgetbody)|Get the file body (as a string or as a stream resource)|
 |[setBody](#vakata\http\uploadsetbody)|Set the upload file body (either set to a stream resource or a string).|
 |[saveAs](#vakata\http\uploadsaveas)|Save the file to a location.|
+|[appendTo](#vakata\http\uploadappendto)|Append the file to a location.|
 
 ---
 
@@ -227,6 +228,25 @@ Save the file to a location.
 
 ```php
 public function saveAs (  
+    string $dest  
+) : bool    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$dest` | `string` | the destination (a file system path) |
+|  |  |  |
+| `return` | `bool` | was the file saved |
+
+---
+
+
+### vakata\http\Upload::appendTo
+Append the file to a location.  
+
+
+```php
+public function appendTo (  
     string $dest  
 ) : bool    
 ```

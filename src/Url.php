@@ -202,7 +202,7 @@ class Url implements UrlInterface
      */
     public function setQuery($query)
     {
-        $this->query = trim($query, '?');
+        $this->query = ltrim($query, '?');
         return $this;
     }
     /**
@@ -357,5 +357,47 @@ class Url implements UrlInterface
             $url = new Url($url);
         }
         return $url->linkTo($this, $forceAbsolute);
+    }
+    /**
+     * append new segments to the current path
+     * @method append
+     * @param  array|string $segments   the URL segments to append
+     * @return self
+     */
+    public function append($segments)
+    {
+        if (!is_array($segments)) {
+            $segments = explode('/', $segments);
+        }
+        $segments = array_values(array_filter($segments));
+        $path = trim($this->getPath(), '/') . '/' . implode('/', $segments);
+        $path = preg_replace('(/+)', '/', $path);
+        return $this->setPath($path);
+    }
+    /**
+     * get a parameter from the URL
+     * @method getParam
+     * @param  string   $key     the name of the parameter
+     * @param  mixed    $default the default value to return if the parameter is not found (defaults to `null`)
+     * @return mixed             the value of the parameter (or the default value)
+     */
+    public function getParam($key, $default = null)
+    {
+        $data = [];
+        parse_str($this->getQuery(), $data);
+        return isset($data[$key]) ? $data[$key] : $default;
+    }
+    /**
+     * set a query param on the URL
+     * @method setParam
+     * @param  string   $key   the param name
+     * @param  mixed    $value the param value
+     */
+    public function setParam($key, $value)
+    {
+        $data = [];
+        parse_str($this->getQuery(), $data);
+        $data[$key] = $value;
+        return $this->setQuery(http_build_query($data));
     }
 }
