@@ -566,13 +566,18 @@ class Request extends Message implements RequestInterface
     /**
      * Send the request.
      * @method send
+     * @param boolean $closeConnection should a "Connection: close" header be added (defaults to true)
      * @return \vakata\http\Response the response.
      * @codeCoverageIgnore
      */
-    public function send()
+    public function send($closeConnection = true)
     {
         if (!$this->url) {
             throw new \Exception('Cannot send without an URL');
+        }
+
+        if ($closeConnection) {
+            $this->setHeader('Connection', 'close');
         }
 
         $lengthAvailable = true;
