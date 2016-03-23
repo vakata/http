@@ -400,6 +400,13 @@ class Response extends Message implements ResponseInterface
             }
         }
         if (!headers_sent()) {
+            if ($this->getHeader('Location') &&
+                $this->code !== 201 &&
+                $this->code !== 202 &&
+                floor($this->code / 100) !== 3
+            ) {
+                $this->setStatusCode(302);
+            }
             http_response_code($this->code);
             foreach ($this->getHeaders() as $k => $v) {
                 header($k . ': ' . $v);
