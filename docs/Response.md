@@ -151,13 +151,15 @@ sets the status code
 
 ```php
 public function setStatusCode (  
-    integer $code  
+    integer $code,  
+    string $reason  
 ) : self    
 ```
 
 |  | Type | Description |
 |-----|-----|-----|
 | `$code` | `integer` | the new status code |
+| `$reason` | `string` | optional reason, if not set the default will be used |
 |  |  |  |
 | `return` | `self` |  |
 

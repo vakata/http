@@ -518,11 +518,14 @@ Send the request.
 
 
 ```php
-public function send () : \vakata\http\Response    
+public function send (  
+    boolean $closeConnection  
+) : \vakata\http\Response    
 ```
 
 |  | Type | Description |
 |-----|-----|-----|
+| `$closeConnection` | `boolean` | should a "Connection: close" header be added (defaults to true) |
 |  |  |  |
 | `return` | [`\vakata\http\Response`](Response.md) | the response. |
 
