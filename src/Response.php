@@ -8,6 +8,7 @@ namespace vakata\http;
 class Response extends Message implements ResponseInterface
 {
     protected $code = 200;
+    protected $reason = 'OK';
     public static $statusTexts = [
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -210,12 +211,17 @@ class Response extends Message implements ResponseInterface
      * sets the status code
      * @method setStatusCode
      * @param  integer        $code the new status code
+     * @param  string         $reason optional reason, if not set the default will be used
      * @return  self
      */
-    public function setStatusCode($code)
+    public function setStatusCode($code, $reason = '')
     {
+        if (!$reason && isset(self::$statusTexts[$code])) {
+            $reason = self::$statusTexts[$code];
+        }
         $this->code = $code;
-        $this->setHeader('Status', $code . ' ' . self::$statusTexts[$code]);
+        $this->reason = $reason;
+        $this->setHeader('Status', $code . ' ' . $reason);
         return $this;
     }
     /**
@@ -311,8 +317,7 @@ class Response extends Message implements ResponseInterface
      */
     public function __toString()
     {
-        $code = $this->getStatusCode();
-        $message = 'HTTP/' . $this->getProtocolVersion() . ' ' . $code . ' ' . self::$statusTexts[$code] . "\r\n";
+        $message = 'HTTP/' . $this->getProtocolVersion() . ' ' . $this->code . ' ' . $this->reason . "\r\n";
         $headers = [];
         foreach ($this->headers as $k => $v) {
             $headers[] = $k . ': ' . $v;
