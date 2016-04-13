@@ -122,23 +122,32 @@ class Response extends Message implements ResponseInterface
      * @method fromFile
      * @param  string   $file a path to a file
      * @param  string   $name optional name to serve the file with
+     * @param  string   $hash optional string to use as ETag
+     * @param  string   $cached optional strtotime expression used for caching validity
      * @return \vakata\http\Response         the response instance
      * @codeCoverageIgnore
      */
-    public static function fromFile($file, $name = null)
+    public static function fromFile($file, $name = null, $hash = null, $cached = null)
     {
+        $res = new self();
         $name = $name ?: basename($file);
         $size = filesize($file);
         if ($name) {
             $extension = substr($name, strrpos($name, '.') + 1);
             if ($extension) {
-                $this->setContentTypeByExtension($extension);
+                $res->setContentTypeByExtension($extension);
             }
-            $this->setHeader('Last-Modified', gmdate('D, d M Y H:i:s', filemtime($file)).' GMT');
+            $res->setHeader('Last-Modified', gmdate('D, d M Y H:i:s', filemtime($file)).' GMT');
+            if ($hash !== null) {
+                $res->setHeader('ETag', $hash);
+            }
+            if ($cached !== null) {
+                $res->cacheUntil($cached);
+            }
             $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
                 'inline' :
                 'attachment';
-            $this->setHeader(
+            $res->setHeader(
                 'Content-Disposition',
                 (
                     $disposition.'; '.
@@ -147,9 +156,10 @@ class Response extends Message implements ResponseInterface
                     'size='.$size
                 )
             );
-            $this->setHeader('Content-Length', $size);
+            $res->setHeader('Content-Length', $size);
         }
-        $this->setBody(fopen($file, 'r'));
+        $res->setBody(fopen($file, 'r'));
+        return $res;
     }
     /**
      * Create an instance from an input string.
@@ -369,7 +379,7 @@ class Response extends Message implements ResponseInterface
             }
             // process cached response (ETag)
             if ($req->hasHeader('If-None-Match') && $this->hasHeader('ETag')) {
-                if ($req->getHeader('If-None-Match') && $this->getHeader('ETag')) {
+                if ($req->getHeader('If-None-Match') === $this->getHeader('ETag')) {
                     $this->setStatusCode(304);
                 }
             }
