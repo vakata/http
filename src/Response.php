@@ -318,7 +318,7 @@ class Response extends Message implements ResponseInterface
         $this->setHeader('Expires', gmdate('D, d M Y H:i:s', $expires).' GMT');
         return $this;
     }
-
+    
     /**
      * get the entire response as a string
      * @method __toString
