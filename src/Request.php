@@ -432,12 +432,32 @@ class Request extends Message implements RequestInterface
             return $key === null ? [] : $default;
         }
         $data = [];
+        //parse_str($this->url->getQuery(), $data);
         $temp = explode('&', $this->url->getQuery());
         foreach ($temp as $var) {
             $var = explode('=', $var, 2);
-            $data[urldecode($var[0])] = isset($var[1]) ? urldecode($var[1]) : '';
+            $name = $var[0];
+            $value = isset($var[1]) ? urldecode($var[1]) : '';
+            $name = explode(']', str_replace(['][', '['], ']', $name));
+            $name = count($name) > 1 ? array_slice($name, 0, -1) : $name;
+
+            $tmp = &$data;
+            foreach ($name as $k) {
+                if ($k === "") {
+                    continue;
+                }
+                if (!isset($tmp[$k])) {
+                    $tmp[$k] = [];
+                }
+                $tmp = &$tmp[$k];
+            }
+            if ($name[count($name) - 1] == '') {
+                $tmp[] = $value;
+            } else {
+                $tmp = $value;
+            }
         }
-        //parse_str($this->url->getQuery(), $data);
+        
         return $this->getValue($data, $key, $default, $mode);
     }
     /**
