@@ -7,6 +7,9 @@ class Request extends Message implements RequestInterface
     protected $method = 'GET';
     protected $files = [];
     protected $url = null;
+    protected $cacheGet = null;
+    protected $cachePost = null;
+    protected $cacheCookie = null;
 
     /**
      * Create an instance.
@@ -169,6 +172,7 @@ class Request extends Message implements RequestInterface
      */
     public function getUrl()
     {
+        $this->cacheGet = null;
         return $this->url;
     }
     /**
@@ -180,7 +184,33 @@ class Request extends Message implements RequestInterface
     public function setUrl($url)
     {
         $this->url = is_string($url) ? new Url($url) : $url;
+        $this->cacheGet = null;
         return $this;
+    }
+    /**
+     * set the message body (either set to a stream resource or a string)
+     * @method setBody
+     * @param  mixed  $body the body to use
+     * @return self
+     */
+    public function setBody($body)
+    {
+        $this->cachePost = null;
+        return parent::setBody($body);
+    }
+    /**
+     * Add a header to the message.
+     * @method setHeader
+     * @param  string    $header the header name
+     * @param  string    $value  the header value
+     * @return  self
+     */
+    public function setHeader($header, $value)
+    {
+        if ($this->cleanHeaderName($header) === 'Cookie') {
+            $this->cacheCookie = null;
+        }
+        return parent::setHeader($header, $value);
     }
     /**
      * add a file to be uploaded (as multipart form data)
@@ -410,13 +440,16 @@ class Request extends Message implements RequestInterface
         if (!$this->hasHeader('Cookie')) {
             return $key === null ? [] : $default;
         }
-        $data = explode(';', $this->getHeader('Cookie'));
-        $real = [];
-        foreach ($data as $v) {
-            $temp = explode('=', $v, 2);
-            $real[trim($temp[0])] = $temp[1];
+        if (!$this->cacheCookie) {
+            $data = explode(';', $this->getHeader('Cookie'));
+            $real = [];
+            foreach ($data as $v) {
+                $temp = explode('=', $v, 2);
+                $real[trim($temp[0])] = $temp[1];
+            }
+            $this->cacheCookie = $real;
         }
-        return $this->getValue($real, $key, $default, $mode);
+        return $this->getValue($this->cacheCookie, $key, $default, $mode);
     }
     /**
      * Get a GET param from the request URL
@@ -431,34 +464,37 @@ class Request extends Message implements RequestInterface
         if (!$this->url) {
             return $key === null ? [] : $default;
         }
-        $data = [];
-        //parse_str($this->url->getQuery(), $data);
-        $temp = explode('&', $this->url->getQuery());
-        foreach ($temp as $var) {
-            $var = explode('=', $var, 2);
-            $name = $var[0];
-            $value = isset($var[1]) ? urldecode($var[1]) : '';
-            $name = explode(']', str_replace(['][', '['], ']', $name));
-            $name = count($name) > 1 ? array_slice($name, 0, -1) : $name;
+        if (!$this->cacheGet) {
+            $data = [];
+            //parse_str($this->url->getQuery(), $data);
+            $temp = explode('&', $this->url->getQuery());
+            foreach ($temp as $var) {
+                $var = explode('=', $var, 2);
+                $name = $var[0];
+                $value = isset($var[1]) ? urldecode($var[1]) : '';
+                $name = explode(']', str_replace(['][', '['], ']', $name));
+                $name = count($name) > 1 ? array_slice($name, 0, -1) : $name;
 
-            $tmp = &$data;
-            foreach ($name as $k) {
-                if ($k === "") {
-                    continue;
+                $tmp = &$data;
+                foreach ($name as $k) {
+                    if ($k === "") {
+                        continue;
+                    }
+                    if (!isset($tmp[$k])) {
+                        $tmp[$k] = [];
+                    }
+                    $tmp = &$tmp[$k];
                 }
-                if (!isset($tmp[$k])) {
-                    $tmp[$k] = [];
+                if ($name[count($name) - 1] == '') {
+                    $tmp[] = $value;
+                } else {
+                    $tmp = $value;
                 }
-                $tmp = &$tmp[$k];
             }
-            if ($name[count($name) - 1] == '') {
-                $tmp[] = $value;
-            } else {
-                $tmp = $value;
-            }
+            $this->cacheGet = $data;
         }
         
-        return $this->getValue($data, $key, $default, $mode);
+        return $this->getValue($this->cacheGet, $key, $default, $mode);
     }
     /**
      * Get a param from the request body (if it is in JSON format it will be parsed out as well)
@@ -470,17 +506,20 @@ class Request extends Message implements RequestInterface
      */
     public function getPost($key = null, $default = null, $mode = null)
     {
-        $data = $this->getBody(true);
-        if (!$data) {
-            return $key === null ? [] : $default;
+        if (!$this->cachePost) {
+            $data = $this->getBody(true);
+            if (!$data) {
+                return $key === null ? [] : $default;
+            }
+            $real = [];
+            if ($this->hasHeader('Content-Type') && strpos($this->getHeader('Content-Type'), 'json') !== false) {
+                $real = json_decode($data, true);
+            } else {
+                parse_str($data, $real);
+            }
+            $this->cachePost = $real;
         }
-        $real = [];
-        if ($this->hasHeader('Content-Type') && strpos($this->getHeader('Content-Type'), 'json') !== false) {
-            $real = json_decode($data, true);
-        } else {
-            parse_str($data, $real);
-        }
-        return $this->getValue($real, $key, $default, $mode);
+        return $this->getValue($this->cachePost, $key, $default, $mode);
     }
     /**
      * Determine if this is an AJAX request
