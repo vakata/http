@@ -318,7 +318,32 @@ class Response extends Message implements ResponseInterface
         $this->setHeader('Expires', gmdate('D, d M Y H:i:s', $expires).' GMT');
         return $this;
     }
-    
+    /**
+     * Enable CORS
+     * @method enableCors
+     * @param  string     $origin  the host to allow CORS for, defaults to `'*'`
+     * @param  string     $creds   are credentials allowed, defaults to `false`
+     * @param  integer    $age     the max age, defaults to `3600`
+     * @param  array      $methods allowed methods, defaults to all
+     * @param  array      $headers allowed headers, defaults to `['Authorization']`
+     * @return self
+     */
+    public function enableCors($origin = '*', $creds = false, $age = 3600, array $methods = null, array $headers = null)
+    {
+        if ($methods === null) {
+            $methods = ['GET','POST','PUT','PATCH','HEAD','DELETE'];
+        }
+        if ($headers === null) {
+            $headers = ['Authorization'];
+        }
+        $this->setHeader('Access-Control-Allow-Origin', $origin);
+        $this->setHeader('Access-Control-Max-Age', $age);
+        $this->setHeader('Access-Control-Allow-Methods', implode(',', $methods));
+        $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
+        $this->setHeader('Access-Control-Allow-Credentials', $creds ? 'true' : 'false');
+
+        return $this;
+    }
     /**
      * get the entire response as a string
      * @method __toString
@@ -352,23 +377,6 @@ class Response extends Message implements ResponseInterface
 
         // modify response according to request
         if ($req) {
-            // process cors request
-            if ($req->isCors()) {
-                $this->setHeader('Access-Control-Allow-Origin', $req->getHeader('Origin'));
-                if ($req->getMethod() === 'OPTIONS') {
-                    $this->setHeader('Access-Control-Max-Age', '3600');
-                    $this->setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,HEAD,DELETE');
-                }
-                $headers = [];
-                if ($req->hasHeader('Access-Control-Request-Headers')) {
-                    $headers = array_map(
-                        'trim',
-                        array_filter(explode(',', $req->getHeader('Access-Control-Request-Headers')))
-                    );
-                }
-                $headers[] = 'Authorization';
-                $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
-            }
             // process cached response (not modified)
             if ($req->hasHeader('If-Modified-Since') && $this->hasHeader('Last-Modified')) {
                 $cached = strtotime($req->getHeader('If-Modified-Since'));

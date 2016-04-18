@@ -12,6 +12,8 @@
 |[setMethod](#vakata\http\requestsetmethod)|set the HTTP verb|
 |[getUrl](#vakata\http\requestgeturl)|get the URL instance for this request|
 |[setUrl](#vakata\http\requestseturl)|set the URL instance associated with the request|
+|[setBody](#vakata\http\requestsetbody)|set the message body (either set to a stream resource or a string)|
+|[setHeader](#vakata\http\requestsetheader)|Add a header to the message.|
 |[addUpload](#vakata\http\requestaddupload)|add a file to be uploaded (as multipart form data)|
 |[hasUploads](#vakata\http\requesthasuploads)|Returns whether there are any files attached to the request.|
 |[hasUpload](#vakata\http\requesthasupload)|Does an uploaded file by the specified key exist on this request.|
@@ -34,13 +36,11 @@
 |[getProtocolVersion](#vakata\http\requestgetprotocolversion)|get the current HTTP version|
 |[setProtocolVersion](#vakata\http\requestsetprotocolversion)|set the HTTP version to use|
 |[getHeaders](#vakata\http\requestgetheaders)|Retrieve all set headers.|
-|[setHeader](#vakata\http\requestsetheader)|Add a header to the message.|
 |[hasHeader](#vakata\http\requesthasheader)|Is a specific header set on the message.|
 |[getHeader](#vakata\http\requestgetheader)|Retieve a header value by name.|
 |[removeHeader](#vakata\http\requestremoveheader)|Remove a header from the message by name.|
 |[removeHeaders](#vakata\http\requestremoveheaders)|Remove all headers from the message.|
 |[getBody](#vakata\http\requestgetbody)|get the message body (as a stream resource or as a string)|
-|[setBody](#vakata\http\requestsetbody)|set the message body (either set to a stream resource or a string)|
 
 ---
 
@@ -164,6 +164,46 @@ public function setUrl (
 |  | Type | Description |
 |-----|-----|-----|
 | `$url` | `\vakata\http\Url`, `string` | the URL for this request |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Request::setBody
+set the message body (either set to a stream resource or a string)  
+
+
+```php
+public function setBody (  
+    mixed $body  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$body` | `mixed` | the body to use |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Request::setHeader
+Add a header to the message.  
+
+
+```php
+public function setHeader (  
+    string $header,  
+    string $value  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$header` | `string` | the header name |
+| `$value` | `string` | the header value |
 |  |  |  |
 | `return` | `self` |  |
 
@@ -583,27 +623,6 @@ public function getHeaders () : array
 ---
 
 
-### vakata\http\Request::setHeader
-Add a header to the message.  
-
-
-```php
-public function setHeader (  
-    string $header,  
-    string $value  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$header` | `string` | the header name |
-| `$value` | `string` | the header value |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
 ### vakata\http\Request::hasHeader
 Is a specific header set on the message.  
 
@@ -692,25 +711,6 @@ public function getBody (
 | `$asString` | `boolean` | should the content be returned as a string (defaults to `false`) |
 |  |  |  |
 | `return` | `mixed` | the body |
-
----
-
-
-### vakata\http\Request::setBody
-set the message body (either set to a stream resource or a string)  
-
-
-```php
-public function setBody (  
-    mixed $body  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$body` | `mixed` | the body to use |
-|  |  |  |
-| `return` | `self` |  |
 
 ---
 

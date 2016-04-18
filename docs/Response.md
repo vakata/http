@@ -14,6 +14,7 @@ A class representing an HTTP response.
 |[setStatusCode](#vakata\http\responsesetstatuscode)|sets the status code|
 |[setContentTypeByExtension](#vakata\http\responsesetcontenttypebyextension)|Set the Content-Type header by using a file extension.|
 |[cacheUntil](#vakata\http\responsecacheuntil)|Make the response cacheable.|
+|[enableCors](#vakata\http\responseenablecors)|Enable CORS|
 |[__toString](#vakata\http\response__tostring)|get the entire response as a string|
 |[send](#vakata\http\responsesend)|Send the response to the client.|
 |[getProtocolVersion](#vakata\http\responsegetprotocolversion)|get the current HTTP version|
@@ -75,7 +76,9 @@ Create an instance from a file.
 ```php
 public static function fromFile (  
     string $file,  
-    string $name  
+    string $name,  
+    string $hash,  
+    string $cached  
 ) : \vakata\http\Response    
 ```
 
@@ -83,6 +86,8 @@ public static function fromFile (
 |-----|-----|-----|
 | `$file` | `string` | a path to a file |
 | `$name` | `string` | optional name to serve the file with |
+| `$hash` | `string` | optional string to use as ETag |
+| `$cached` | `string` | optional strtotime expression used for caching validity |
 |  |  |  |
 | `return` | [`\vakata\http\Response`](Response.md) | the response instance |
 
@@ -198,6 +203,33 @@ public function cacheUntil (
 |  | Type | Description |
 |-----|-----|-----|
 | `$expires` | `int`, `string` | when should the request expire - either a timestamp or strtotime expression |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Response::enableCors
+Enable CORS  
+
+
+```php
+public function enableCors (  
+    string $origin,  
+    string $creds,  
+    integer $age,  
+    array $methods,  
+    array $headers  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$origin` | `string` | the host to allow CORS for, defaults to `'*'` |
+| `$creds` | `string` | are credentials allowed, defaults to `false` |
+| `$age` | `integer` | the max age, defaults to `3600` |
+| `$methods` | `array` | allowed methods, defaults to all |
+| `$headers` | `array` | allowed headers, defaults to `['Authorization']` |
 |  |  |  |
 | `return` | `self` |  |
 
