@@ -243,7 +243,7 @@ class Response extends Message implements ResponseInterface
      */
     public function setContentTypeByExtension($type)
     {
-        switch (mb_strtolower($type)) {
+        switch (strtolower($type)) {
             case "txt":
             case "text":
                 $type = "text/plain; charset=UTF-8";

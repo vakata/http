@@ -49,6 +49,12 @@ class Request extends Message implements RequestInterface
                 $headers[$key] = $val;
             }
         }
+        if(isset($_SERVER['CONTENT_TYPE'])) {
+            $headers['CONTENT_TYPE'] = $_SERVER['CONTENT_TYPE'];
+        }
+        if(isset($_SERVER['CONTENT_LENGTH'])) {
+            $headers['CONTENT_LENGTH'] = $_SERVER['CONTENT_LENGTH'];
+        }
 
         foreach ($headers as $key => $value) {
             $req->setHeader($key, $value);
