@@ -476,7 +476,7 @@ class Request extends Message implements RequestInterface
             $temp = explode('&', $this->url->getQuery());
             foreach ($temp as $var) {
                 $var = explode('=', $var, 2);
-                $name = $var[0];
+                $name = urldecode($var[0]);
                 $value = isset($var[1]) ? urldecode($var[1]) : '';
                 $name = explode(']', str_replace(['][', '['], ']', $name));
                 $name = count($name) > 1 ? array_slice($name, 0, -1) : $name;
