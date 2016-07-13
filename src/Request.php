@@ -83,9 +83,9 @@ class Request extends Message implements RequestInterface
     public static function fromString($str)
     {
         $req = new self();
-        $str = str_replace(["\r\n", "\n"], ["\n", "\r\n"], $str);
-        list($headers, $message) = explode("\r\n\r\n", $str, 2);
-        $headers = explode("\r\n", preg_replace("(\r\n\s+)", " ", $headers));
+        $break = strpos($str, "\r\n\r\n") === false ? "\n" : "\r\n"; // just in case someone breaks RFC 2616
+        list($headers, $message) = explode($break . $break, $str, 2);
+        $headers = explode($break, preg_replace("(" . $break . "\s+)", " ", $headers));
         if (isset($headers[0]) && strlen($headers[0])) {
             $temp = explode(' ', $headers[0]);
             if (in_array($temp[0], ['GET', 'POST', 'HEAD', 'PATCH', 'PUT', 'OPTIONS', 'TRACE', 'DELETE'])) {
@@ -112,14 +112,13 @@ class Request extends Message implements RequestInterface
 
         if (strpos($req->getHeader('Content-Type'), 'multipart') !== false) {
             $bndr = trim(explode(' boundary=', $req->getHeader('Content-Type'))[1], '"');
-            $parts = explode("\r\n" . '--' . $bndr, "\r\n" . $message);
+            $parts = explode($break . '--' . $bndr, $break . $message);
             array_pop($parts);
             array_shift($parts);
             $post = [];
             foreach ($parts as $item) {
-                $item = str_replace(["\r\n", "\n"], ["\n", "\r\n"], $item);
-                list($head, $body) = explode("\r\n\r\n", $item, 2);
-                $head = explode("\r\n", preg_replace("(\r\n\s+)", " ", $head));
+                list($head, $body) = explode($break . $break, $item, 2);
+                $head = explode($break, preg_replace("(" . $break . "\s+)", " ", $head));
                 foreach ($head as $h) {
                     if (strpos(strtolower($h), 'content-disposition') === 0) {
                         $cd = explode(';', $h);

@@ -171,9 +171,9 @@ class Response extends Message implements ResponseInterface
     public static function fromString($str)
     {
         $res = new self();
-        $str = str_replace(["\r\n", "\n"], ["\n", "\r\n"], $str);
-        list($headers, $message) = explode("\r\n\r\n", (string)$str, 2);
-        $headers = explode("\r\n", preg_replace("(\r\n\s+)", " ", $headers));
+        $break = strpos($str, "\r\n\r\n") === false ? "\n" : "\r\n"; // just in case someone breaks RFC 2616
+        list($headers, $message) = explode($break . $break, (string)$str, 2);
+        $headers = explode($break, preg_replace("(" . $break . "\s+)", " ", $headers));
         if (isset($headers[0]) && substr($headers[0], 0, 5) === 'HTTP/') {
             $temp = explode(' ', substr($headers[0], 5));
             $res->setProtocolVersion($temp[0]);
