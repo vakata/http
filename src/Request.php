@@ -450,7 +450,7 @@ class Request extends Message implements RequestInterface
             $real = [];
             foreach ($data as $v) {
                 $temp = explode('=', $v, 2);
-                $real[trim($temp[0])] = $temp[1];
+                $real[trim($temp[0])] = urldecode($temp[1]);
             }
             $this->cacheCookie = $real;
         }

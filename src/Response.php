@@ -70,6 +70,7 @@ class Response extends Message implements ResponseInterface
         510 => 'Not Extended',                                                // RFC2774
         511 => 'Network Authentication Required',                             // RFC6585
     ];
+    protected $cookies = [];
 
     /**
      * Create an instance.
@@ -345,6 +346,55 @@ class Response extends Message implements ResponseInterface
         return $this;
     }
     /**
+     * Set a cookie
+     * @method setCookie
+     * @param  string    $name  the cookie name
+     * @param  string    $value the cookie value
+     * @param  string    $extra optional extra params for the cookie (semicolon delimited)
+     * @return  self
+     */
+    public function setCookie($name, $value, $extra = '')
+    {
+        $this->cookies[$name] = [ $value, $extra ];
+        return $this;
+    }
+    /**
+     * Get a cookie value
+     * @method getCookie
+     * @param  string    $name    the cookie name
+     * @param  mixed     $default a default value to return if the cookie is not found, defaults to `null`
+     * @return mixed     the cookie value (or the default if the cookie is not found)
+     */
+    public function getCookie($name, $default = null)
+    {
+        return isset($this->cookies[$name]) ? $this->cookies[$name][0] : $default;
+    }
+    /**
+     * Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).
+     * @method removeCookie
+     * @param  string       $name the cookie name
+     * @return self
+     */
+    public function removeCookie($name)
+    {
+        if (isset($this->cookies[$name])) {
+            unset($this->cookies[$name]);
+        }
+        return $this;
+    }
+    /**
+     * Expires an existing cookie
+     * @method expireCookie
+     * @param  string    $name the cookie name
+     * @param  string    $extra optional extra params for the cookie (semicolon delimited)
+     * @return self
+     */
+    public function expireCookie($name, $extra = '')
+    {
+        $extra = implode('; ', array_filter([ $extra, 'Expires=' . date('r', 0) ]));
+        return $this->setCookie($name, 'deleted', $extra);
+    }
+    /**
      * get the entire response as a string
      * @method __toString
      * @return string     the messsage
@@ -356,6 +406,9 @@ class Response extends Message implements ResponseInterface
         $headers = [];
         foreach ($this->headers as $k => $v) {
             $headers[] = $k . ': ' . $v;
+        }
+        foreach ($this->cookies as $k => $v) {
+            $headers[] = 'Set-Cookie: ' . $k . '=' . urlencode($v[0]) . '; ' . $v[1];
         }
         $message .= implode("\r\n", $headers);
         $message .= "\r\n\r\n";
@@ -428,6 +481,9 @@ class Response extends Message implements ResponseInterface
             http_response_code($this->code);
             foreach ($this->getHeaders() as $k => $v) {
                 header($k . ': ' . $v);
+            }
+            foreach ($this->cookies as $k => $v) {
+                header('Set-Cookie: ' . $k . '=' . urlencode($v[0]) . '; ' . $v[1], false);
             }
         }
         if ($this->body && (!in_array($this->getStatusCode(), [204,304,416])) && (!$req || $req->getMethod() !== 'HEAD')) {
