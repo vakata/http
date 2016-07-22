@@ -100,8 +100,8 @@ class Request extends Message implements RequestInterface
         if (false === ($ip = filter_var($ip, FILTER_VALIDATE_IP))) {
             $ip = '0';
         }
-        $this->setSenderIP($ip);
-        $this->setSenderPort((int)$_SERVER['REMOTE_PORT']);
+        $req->setSenderIP($ip);
+        $req->setSenderPort((int)$_SERVER['REMOTE_PORT']);
 
         return $req;
     }
@@ -829,7 +829,7 @@ class Request extends Message implements RequestInterface
             $str,
             30,
             STREAM_CLIENT_CONNECT,
-            $context
+            stream_context_create($context)
         );
 
         // request line
