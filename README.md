@@ -74,7 +74,7 @@ $res->setBody("asdf");
 $res->send(\vakata\http\Request::fromRequest());
 
 // this makes it simple to create a simple proxy or example
-\vakata\http\Request::fromRequest()->setUrl('http://a.tld')->send()->send();
+\vakata\http\Request::fromRequest()->setUrl('http://a.tld')->setSenderIP('0')->setSenderPort('0')->send()->send();
 
 // when using fromRequest the request is populated with all uploaded data too
 $up = $req->getUpload("file_key");

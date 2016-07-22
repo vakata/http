@@ -10,6 +10,10 @@
 |[fromString](#vakata\http\requestfromstring)|Create an instance from a stringified request.|
 |[getMethod](#vakata\http\requestgetmethod)|get the HTTP verb used (GET / POST / PUT / etc), defaults to `GET`|
 |[setMethod](#vakata\http\requestsetmethod)|set the HTTP verb|
+|[getSenderPort](#vakata\http\requestgetsenderport)|get the port of the sender|
+|[setSenderPort](#vakata\http\requestsetsenderport)|set the port of the sender (useful when you are the sender and want a specific outgoing port when calling send)|
+|[getSenderIP](#vakata\http\requestgetsenderip)|get the IP address of the sender|
+|[setSenderIP](#vakata\http\requestsetsenderip)|set the IP address of the sender (useful if you are the sender and want a specific outgoing ip when calling send)|
 |[getUrl](#vakata\http\requestgeturl)|get the URL instance for this request|
 |[setUrl](#vakata\http\requestseturl)|set the URL instance associated with the request|
 |[setBody](#vakata\http\requestsetbody)|set the message body (either set to a stream resource or a string)|
@@ -129,6 +133,76 @@ public function setMethod (
 |  | Type | Description |
 |-----|-----|-----|
 | `$method` | `string` | the verb |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Request::getSenderPort
+get the port of the sender  
+
+
+```php
+public function getSenderPort () : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+|  |  |  |
+| `return` | `string` | the sender's port |
+
+---
+
+
+### vakata\http\Request::setSenderPort
+set the port of the sender (useful when you are the sender and want a specific outgoing port when calling send)  
+
+
+```php
+public function setSenderPort (  
+    string $port  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$port` | `string` | the sender's port |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Request::getSenderIP
+get the IP address of the sender  
+
+
+```php
+public function getSenderIP () : string    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+|  |  |  |
+| `return` | `string` | the sender's IP |
+
+---
+
+
+### vakata\http\Request::setSenderIP
+set the IP address of the sender (useful if you are the sender and want a specific outgoing ip when calling send)  
+
+
+```php
+public function setSenderIP (  
+    string $ip  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$ip` | `string` | the sender's IP |
 |  |  |  |
 | `return` | `self` |  |
 

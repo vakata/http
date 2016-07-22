@@ -4,9 +4,15 @@ return (object)[
     'destDirectory' => 'docs',
     'format' => 'github',
     'classes' => [
+        '\\vakata\\http\\MessageInterface',
+        '\\vakata\\http\\Message',
+        '\\vakata\\http\\RequestInterface',
         '\\vakata\\http\\Request',
+        '\\vakata\\http\\ResponseInterface',
         '\\vakata\\http\\Response',
+        '\\vakata\\http\\UrlInterface',
         '\\vakata\\http\\Url',
+        '\\vakata\\http\\UploadInterface',
         '\\vakata\\http\\Upload'
     ],
 ];

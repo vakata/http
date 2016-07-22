@@ -15,6 +15,10 @@ A class representing an HTTP response.
 |[setContentTypeByExtension](#vakata\http\responsesetcontenttypebyextension)|Set the Content-Type header by using a file extension.|
 |[cacheUntil](#vakata\http\responsecacheuntil)|Make the response cacheable.|
 |[enableCors](#vakata\http\responseenablecors)|Enable CORS|
+|[setCookie](#vakata\http\responsesetcookie)|Set a cookie|
+|[getCookie](#vakata\http\responsegetcookie)|Get a cookie value|
+|[removeCookie](#vakata\http\responseremovecookie)|Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).|
+|[expireCookie](#vakata\http\responseexpirecookie)|Expires an existing cookie|
 |[__toString](#vakata\http\response__tostring)|get the entire response as a string|
 |[send](#vakata\http\responsesend)|Send the response to the client.|
 |[getProtocolVersion](#vakata\http\responsegetprotocolversion)|get the current HTTP version|
@@ -230,6 +234,90 @@ public function enableCors (
 | `$age` | `integer` | the max age, defaults to `3600` |
 | `$methods` | `array` | allowed methods, defaults to all |
 | `$headers` | `array` | allowed headers, defaults to `['Authorization']` |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Response::setCookie
+Set a cookie  
+
+
+```php
+public function setCookie (  
+    string $name,  
+    string $value,  
+    string $extra  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$name` | `string` | the cookie name |
+| `$value` | `string` | the cookie value |
+| `$extra` | `string` | optional extra params for the cookie (semicolon delimited) |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Response::getCookie
+Get a cookie value  
+
+
+```php
+public function getCookie (  
+    string $name,  
+    mixed $default  
+) : mixed    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$name` | `string` | the cookie name |
+| `$default` | `mixed` | a default value to return if the cookie is not found, defaults to `null` |
+|  |  |  |
+| `return` | `mixed` | the cookie value (or the default if the cookie is not found) |
+
+---
+
+
+### vakata\http\Response::removeCookie
+Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).  
+
+
+```php
+public function removeCookie (  
+    string $name  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$name` | `string` | the cookie name |
+|  |  |  |
+| `return` | `self` |  |
+
+---
+
+
+### vakata\http\Response::expireCookie
+Expires an existing cookie  
+
+
+```php
+public function expireCookie (  
+    string $name,  
+    string $extra  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$name` | `string` | the cookie name |
+| `$extra` | `string` | optional extra params for the cookie (semicolon delimited) |
 |  |  |  |
 | `return` | `self` |  |
 

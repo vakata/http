@@ -24,6 +24,9 @@ interface UrlInterface
     public function getSegments();
     public function getSegment($i, $ext = true);
     public function __toString();
+    public function append($segments);
+    public function getParam($key, $default = null);
+    public function setParam($key, $value);
 
     public function linkFrom($url, $forceAbsolute = true);
     public function linkTo($url, $forceAbsolute = true);

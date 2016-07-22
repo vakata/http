@@ -18,6 +18,11 @@ interface RequestInterface extends MessageInterface
     public function removeUpload($key);
     public function removeUploads();
 
+    public function getSenderPort();
+    public function setSenderPort($port);
+    public function getSenderIP();
+    public function setSenderIP($ip);
+
     // shortcuts
     public function getAuthorization();
     public function getPreferedResponseFormat($default = null);

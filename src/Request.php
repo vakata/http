@@ -10,6 +10,8 @@ class Request extends Message implements RequestInterface
     protected $cacheGet = null;
     protected $cachePost = null;
     protected $cacheCookie = null;
+    protected $senderIP = '0';
+    protected $senderPort = '0';
 
     /**
      * Create an instance.
@@ -70,6 +72,36 @@ class Request extends Message implements RequestInterface
                 $req->addUpload($k, Upload::fromRequest($k));
             }
         }
+
+        // determine sender IP
+        $ip = '0';
+        // TODO: check if remote_addr is a cloudflare one and only then read the connecting ip
+        // https://www.cloudflare.com/ips-v4
+        // https://www.cloudflare.com/ips-v6
+        if (false && isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+            $ip = $_SERVER["HTTP_CF_CONNECTING_IP"];
+        }
+        elseif (isset($_SERVER['REMOTE_ADDR']) && isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        }
+        elseif (isset($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        }
+        elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
+        if (strpos($ip, ',') !== false) {
+            $ip = @end(explode(',', $ip));
+        }
+        $ip = trim($ip);
+        if (false === ($ip = filter_var($ip, FILTER_VALIDATE_IP))) {
+            $ip = '0';
+        }
+        $this->setSenderIP($ip);
+        $this->setSenderPort((int)$_SERVER['REMOTE_PORT']);
 
         return $req;
     }
@@ -168,6 +200,46 @@ class Request extends Message implements RequestInterface
     public function setMethod($method)
     {
         $this->method = strtoupper($method);
+        return $this;
+    }
+    /**
+     * get the port of the sender
+     * @method getSenderPort
+     * @return string    the sender's port
+     */
+    public function getSenderPort()
+    {
+        return $this->senderPort;
+    }
+    /**
+     * set the port of the sender (useful when you are the sender and want a specific outgoing port when calling send)
+     * @method setSenderPort
+     * @param  string    $port the sender's port
+     * @return  self
+     */
+    public function setSenderPort($port)
+    {
+        $this->senderPort = $port;
+        return $this;
+    }
+    /**
+     * get the IP address of the sender
+     * @method getSenderIP
+     * @return string    the sender's IP
+     */
+    public function getSenderIP()
+    {
+        return $this->senderIP;
+    }
+    /**
+     * set the IP address of the sender (useful if you are the sender and want a specific outgoing ip when calling send)
+     * @method setSenderIP
+     * @param  string    $ip the sender's IP
+     * @return  self
+     */
+    public function setSenderIP($ip)
+    {
+        $this->senderIP = $ip;
         return $this;
     }
     /**
@@ -705,6 +777,10 @@ class Request extends Message implements RequestInterface
             }
             $context['http']['content'] = $message;
         }
+        $ip = strpos($this->senderIP, ':') !== false ? '['.$this->senderIP.']' : $this->senderIP;
+        $context['socket'] = [
+            'bindto' => $ip . ':' . $this->senderPort
+        ];
         $resp = fopen((string)$this->getUrl(), 'r', false, stream_context_create($context));
         $head = implode("\r\n", stream_get_meta_data($resp)['wrapper_data']);
         $body = stream_get_contents($resp);
@@ -741,7 +817,20 @@ class Request extends Message implements RequestInterface
         }
         $transport = $this->getUrl()->getScheme() === 'https' ? 'tls' : 'tcp';
         $port = $this->getUrl()->getPort() ?: ($transport === 'tls' ? 443 : 80);
-        $resp = stream_socket_client($transport . "://" . $this->getUrl()->getHost(). ":" . $port, $num, $str, 30);
+        $ip = strpos($this->senderIP, ':') !== false ? '['.$this->senderIP.']' : $this->senderIP;
+        $context = [
+            'socket' => [
+                'bindto' => $ip . ':'. $this->senderPort
+            ]
+        ];
+        $resp = stream_socket_client(
+            $transport . "://" . $this->getUrl()->getHost(). ":" . $port,
+            $num,
+            $str,
+            30,
+            STREAM_CLIENT_CONNECT,
+            $context
+        );
 
         // request line
         $line  = $this->getMethod() . ' ';
