@@ -26,6 +26,8 @@
 |[removeUpload](#vakata\http\requestremoveupload)|Remove a file from the request.|
 |[removeUploads](#vakata\http\requestremoveuploads)|Clean all files associated with the request.|
 |[getAuthorization](#vakata\http\requestgetauthorization)|Get any authorization details supplied with the request.|
+|[getAuthorizationToken](#vakata\http\requestgetauthorizationtoken)|Get any authorization details supplied with the request.|
+|[setAuthorizationToken](#vakata\http\requestsetauthorizationtoken)|Get any authorization details supplied with the request.|
 |[getPreferedResponseLanguage](#vakata\http\requestgetpreferedresponselanguage)|Get the preffered response language (parses the Accept-Language header if present).|
 |[getPreferedResponseFormat](#vakata\http\requestgetpreferedresponseformat)|Get the prefered response format.|
 |[getCookie](#vakata\http\requestgetcookie)|Gets a value from a cookie that came with the request|
@@ -424,6 +426,41 @@ public function getAuthorization () : array, null
 |-----|-----|-----|
 |  |  |  |
 | `return` | `array`, `null` | array of extracted values or null (possible keys are username, password and token) |
+
+---
+
+
+### vakata\http\Request::getAuthorizationToken
+Get any authorization details supplied with the request.  
+
+
+```php
+public function getAuthorizationToken () : string, null    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+|  |  |  |
+| `return` | `string`, `null` | the token, or `null` if none was supplied |
+
+---
+
+
+### vakata\http\Request::setAuthorizationToken
+Get any authorization details supplied with the request.  
+
+
+```php
+public function setAuthorizationToken (  
+    string $token  
+) : self    
+```
+
+|  | Type | Description |
+|-----|-----|-----|
+| `$token` | `string` | the token to set |
+|  |  |  |
+| `return` | `self` |  |
 
 ---
 

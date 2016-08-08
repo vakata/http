@@ -25,6 +25,8 @@ interface RequestInterface extends MessageInterface
 
     // shortcuts
     public function getAuthorization();
+    public function getAuthorizationToken();
+    public function setAuthorizationToken($token);
     public function getPreferedResponseFormat($default = null);
     public function getPreferedResponseLanguage($default = null);
     public function getCookie($key = null, $default = null, $mode = null);

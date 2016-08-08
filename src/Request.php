@@ -389,6 +389,26 @@ class Request extends Message implements RequestInterface
         }
     }
     /**
+     * Get any authorization details supplied with the request.
+     * @method getAuthorizationToken
+     * @return string|null           the token, or `null` if none was supplied
+     */
+    public function getAuthorizationToken()
+    {
+        $temp = $this->getAuthorization();
+        return isset($temp['token']) ? $temp['token'] : null;
+    }
+    /**
+     * Get any authorization details supplied with the request.
+     * @method setAuthorizationToken
+     * @param  string $token    the token to set
+     * @return self
+     */
+    public function setAuthorizationToken($token)
+    {
+        return $this->setHeader('Authorization', 'token ' . $token);
+    }
+    /**
      * Get the preffered response language (parses the Accept-Language header if present).
      * @method getPreferedResponseLanguage
      * @param  string                      $default the default code to return if the header is not found
