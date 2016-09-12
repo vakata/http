@@ -266,15 +266,22 @@ class Response extends Message implements ResponseInterface
                 $type = "application/zip";
                 break;
             case "docx":
+                $type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                break;
             case "doc":
                 $type = "application/msword";
                 break;
             case "xlsx":
+                $type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                break;
             case "xls":
                 $type = "application/vnd.ms-excel";
                 break;
             case "ppt":
                 $type = "application/vnd.ms-powerpoint";
+                break;
+            case "pptx":
+                $type = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
                 break;
             case "gif":
                 $type = "image/gif";
