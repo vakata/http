@@ -132,6 +132,9 @@ abstract class Message implements MessageInterface
      */
     public function setBody($body)
     {
+        if ($this->body) {
+            fclose($this->body);
+        }
         if (is_string($body)) {
             $this->body = fopen('php://temp', 'r+');
             fwrite($this->body, $body);
