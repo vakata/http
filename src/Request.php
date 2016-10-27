@@ -177,7 +177,7 @@ class Request extends Message implements RequestInterface
         $req->removeHeader('Transfer-Encoding');
         return $req;
     }
-    
+
 
     /**
      * get the HTTP verb used (GET / POST / PUT / etc), defaults to `GET`
@@ -538,7 +538,8 @@ class Request extends Message implements RequestInterface
         if (!$this->cacheGet) {
             $data = [];
             //parse_str($this->url->getQuery(), $data);
-            $temp = explode('&', $this->url->getQuery());
+            $temp = (string)$this->url->getQuery();
+            $temp = strlen($temp) ? explode('&', $temp) : [];
             foreach ($temp as $var) {
                 $var = explode('=', $var, 2);
                 $name = urldecode($var[0]);
@@ -564,7 +565,7 @@ class Request extends Message implements RequestInterface
             }
             $this->cacheGet = $data;
         }
-        
+
         return $this->getValue($this->cacheGet, $key, $default, $mode);
     }
     /**
