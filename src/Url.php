@@ -9,7 +9,6 @@ class Url implements UrlInterface
     protected $data = [];
     /**
      * Create an instance.
-     * @method __construct
      * @param  string      $url the URL to parse
      */
     public function __construct($url)
@@ -34,7 +33,6 @@ class Url implements UrlInterface
     }
     /**
      * Create an instance from the current request.
-     * @method fromRequest
      * @return vakata\http\Url  the URL instance of the current request
      * @codeCoverageIgnore
      */
@@ -54,7 +52,6 @@ class Url implements UrlInterface
     }
     /**
      * Get the URL scheme (http, https, etc), defaults to `"http"`.
-     * @method getScheme
      * @return string the scheme
      */
     public function getScheme()
@@ -63,7 +60,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the scheme.
-     * @method setScheme
      * @param  string    $scheme the new scheme
      * @return  self
      */
@@ -74,7 +70,6 @@ class Url implements UrlInterface
     }
     /**
      * Get the host part of the URL (for example - google.com), defaults to `"localhost"`.
-     * @method getHost
      * @return string the host
      */
     public function getHost()
@@ -83,7 +78,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the host part of the URL.
-     * @method setHost
      * @param  string  $host the new host
      * @return  self
      */
@@ -94,7 +88,6 @@ class Url implements UrlInterface
     }
     /**
      * Get the port, if a standart port is used this will return `null`.
-     * @method getPort
      * @return string|null the port
      */
     public function getPort()
@@ -103,7 +96,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the port of the URL.
-     * @method setPort
      * @param  string|int $port the new port
      * @return  self
      */
@@ -114,7 +106,6 @@ class Url implements UrlInterface
     }
     /**
      * Get the user part of the URL (if supplied in the form scheme://user:pass@domain.tld/).
-     * @method getUser
      * @return string|null the username
      */
     public function getUser()
@@ -123,7 +114,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the user part of the URL.
-     * @method setUser
      * @param  string  $user the new user
      * @return  self
      */
@@ -134,7 +124,6 @@ class Url implements UrlInterface
     }
     /**
      * Get the password part of the URL (if supplied in the form scheme://user:pass@domain.tld/).
-     * @method getPass
      * @return string|null the password
      */
     public function getPass()
@@ -143,7 +132,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the password part of the URL.
-     * @method setPass
      * @param  string  $pass the new password
      * @return  self
      */
@@ -154,7 +142,6 @@ class Url implements UrlInterface
     }
     /**
      * Returns the path part of the URL.
-     * @method getPath
      * @param  boolean $ext should the extension (for example .html) be returned (if any), defaults to `true`
      * @return string   the path
      */
@@ -164,7 +151,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the path part of the URL.
-     * @method setPath
      * @param  string  $path the new path
      * @return  self
      */
@@ -175,7 +161,6 @@ class Url implements UrlInterface
     }
     /**
      * get the extension part of the URL (like: html, gif, jpg)
-     * @method getExtension
      * @param  string    $default the default to use if the URL does not have an extension (optional)
      * @return string|null             the extenstion
      */
@@ -187,7 +172,6 @@ class Url implements UrlInterface
     }
     /**
      * get the query part of the URL (after the question mark)
-     * @method getQuery
      * @return string the query
      */
     public function getQuery()
@@ -196,7 +180,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the query part og the URL.
-     * @method setQuery
      * @param  string   $query the new query
      * @return  self
      */
@@ -207,7 +190,6 @@ class Url implements UrlInterface
     }
     /**
      * Get the fragment part of the URL (after the hash sign).
-     * @method getFragment
      * @return string   the fragment
      */
     public function getFragment()
@@ -216,7 +198,6 @@ class Url implements UrlInterface
     }
     /**
      * Set the fragment part of the URL
-     * @method setFragment
      * @param  string      $fragment the new fragment
      * @return  self
      */
@@ -227,7 +208,6 @@ class Url implements UrlInterface
     }
     /**
      * get the path part of the URL as an array (the path string exploded by `/`)
-     * @method getSegments
      * @return array   the path segments
      */
     public function getSegments()
@@ -243,7 +223,6 @@ class Url implements UrlInterface
     }
     /**
      * get a specific segment from the path part of the URL
-     * @method getSegment
      * @param  integer  $i  the index of the segment (can be negative too)
      * @param  boolean $ext should the extension be included (if the segment is the last one), defaults to `true`
      * @return string|null  the segment (or null if the index is invalid)
@@ -262,7 +241,6 @@ class Url implements UrlInterface
     }
     /**
      * get the entire URL back as a string
-     * @method __toString
      * @return string     the URL
      */
     public function __toString()
@@ -296,7 +274,6 @@ class Url implements UrlInterface
     }
     /**
      * get a link from the current URL to another one
-     * @method linkTo
      * @param  UrlInterface|string $url the URL to link to
      * @param  boolean $forceAbsolute   should an absolute path be used, defaults to `true`)
      * @return string  the link
@@ -346,7 +323,6 @@ class Url implements UrlInterface
     }
     /**
      * get a link to the current URL from another one
-     * @method linkFrom
      * @param  UrlInterface|string $url the URL to link from
      * @param  boolean  $forceAbsolute  should an absolute path be used, defaults to `true`
      * @return string                   the link
@@ -360,7 +336,6 @@ class Url implements UrlInterface
     }
     /**
      * append new segments to the current path
-     * @method append
      * @param  array|string $segments   the URL segments to append
      * @return self
      */
@@ -376,7 +351,6 @@ class Url implements UrlInterface
     }
     /**
      * get a parameter from the URL
-     * @method getParam
      * @param  string   $key     the name of the parameter
      * @param  mixed    $default the default value to return if the parameter is not found (defaults to `null`)
      * @return mixed             the value of the parameter (or the default value)
@@ -389,7 +363,6 @@ class Url implements UrlInterface
     }
     /**
      * set a query param on the URL
-     * @method setParam
      * @param  string   $key   the param name
      * @param  mixed    $value the param value
      */

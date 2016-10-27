@@ -15,7 +15,6 @@ class Request extends Message implements RequestInterface
 
     /**
      * Create an instance.
-     * @method __construct
      * @param  string      $method the method for the request
      * @param  string      $url    the URL for the request
      */
@@ -27,7 +26,6 @@ class Request extends Message implements RequestInterface
 
     /**
      * create a request instance from the current user request
-     * @method fromRequest
      * @return \vakata\http\Request      the instance
      * @codeCoverageIgnore
      */
@@ -107,7 +105,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Create an instance from a stringified request.
-     * @method fromString
      * @param  string     $str the stringified request
      * @return \vakata\http\Request          the request instance
      * @codeCoverageIgnore
@@ -184,7 +181,6 @@ class Request extends Message implements RequestInterface
 
     /**
      * get the HTTP verb used (GET / POST / PUT / etc), defaults to `GET`
-     * @method getMethod
      * @return string    the verb
      */
     public function getMethod()
@@ -193,7 +189,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * set the HTTP verb
-     * @method setMethod
      * @param  string    $method the verb
      * @return  self
      */
@@ -204,7 +199,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * get the port of the sender
-     * @method getSenderPort
      * @return string    the sender's port
      */
     public function getSenderPort()
@@ -213,7 +207,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * set the port of the sender (useful when you are the sender and want a specific outgoing port when calling send)
-     * @method setSenderPort
      * @param  string    $port the sender's port
      * @return  self
      */
@@ -224,7 +217,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * get the IP address of the sender
-     * @method getSenderIP
      * @return string    the sender's IP
      */
     public function getSenderIP()
@@ -233,7 +225,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * set the IP address of the sender (useful if you are the sender and want a specific outgoing ip when calling send)
-     * @method setSenderIP
      * @param  string    $ip the sender's IP
      * @return  self
      */
@@ -244,7 +235,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * get the URL instance for this request
-     * @method getUrl
      * @return \vakata\http\Url the URL instance
      */
     public function getUrl()
@@ -254,7 +244,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * set the URL instance associated with the request
-     * @method setUrl
      * @param  \vakata\http\Url|string $url the URL for this request
      * @return  self
      */
@@ -266,7 +255,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * set the message body (either set to a stream resource or a string)
-     * @method setBody
      * @param  mixed  $body the body to use
      * @return self
      */
@@ -277,7 +265,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Add a header to the message.
-     * @method setHeader
      * @param  string    $header the header name
      * @param  string    $value  the header value
      * @return  self
@@ -291,7 +278,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * add a file to be uploaded (as multipart form data)
-     * @method addUpload
      * @param  string  $key     the multipart name
      * @param  UploadInterface|stream|string  $content the file contents
      * @param  string  $name    the file name to submit under
@@ -304,7 +290,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Returns whether there are any files attached to the request.
-     * @method hasUploads
      * @return boolean      are there are any files attached
      */
     public function hasUploads()
@@ -313,7 +298,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Does an uploaded file by the specified key exist on this request.
-     * @method hasUpload
      * @param  string  $key the multipart name
      * @return boolean      does the file exist
      */
@@ -323,7 +307,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get the upload file instance for the specified key.
-     * @method getUpload
      * @param  string  $key the multipart name
      * @return \vakata\http\Upload       the file
      */
@@ -333,7 +316,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get the array of files that are about to be uploaded.
-     * @method getUploads
      * @return array   an array of Upload objects
      */
     public function getUploads()
@@ -342,7 +324,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Remove a file from the request.
-     * @method removeUpload
      * @param  string     $key the multipart name
      * @return self
      */
@@ -355,7 +336,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Clean all files associated with the request.
-     * @method removeUploads
      * @return self
      */
     public function removeUploads()
@@ -366,7 +346,6 @@ class Request extends Message implements RequestInterface
 
     /**
      * Get any authorization details supplied with the request.
-     * @method getAuthorization
      * @return array|null           array of extracted values or null (possible keys are username, password and token)
      */
     public function getAuthorization()
@@ -390,7 +369,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get any authorization details supplied with the request.
-     * @method getAuthorizationToken
      * @return string           the token (or an empty string)
      */
     public function getAuthorizationToken()
@@ -400,7 +378,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get any authorization details supplied with the request.
-     * @method setAuthorizationToken
      * @param  string $token    the token to set
      * @param  string $method   the keyword (defaults to `token`)
      * @return self
@@ -411,7 +388,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get the preffered response language (parses the Accept-Language header if present).
-     * @method getPreferedResponseLanguage
      * @param  string                      $default the default code to return if the header is not found
      * @return string                      the prefered language code
      */
@@ -439,7 +415,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get the prefered response format.
-     * @method getPreferedResponseFormat
      * @param  string                    $default the default value to return if the Accept header is not present.
      * @return string                    the desired response format
      */
@@ -527,7 +502,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Gets a value from a cookie that came with the request
-     * @method getCookie
      * @param  string    $key     the cookie name
      * @param  string    $default optional default value to return if the key is not present (default to `null`)
      * @param  string    $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
@@ -551,7 +525,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get a GET param from the request URL
-     * @method getQuery
      * @param  string   $key     the GET param name
      * @param  string   $default optional default value to return if the key is not present (default to `null`)
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
@@ -596,7 +569,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Get a param from the request body (if it is in JSON format it will be parsed out as well)
-     * @method getPost
      * @param  string   $key     the param name
      * @param  string   $default optional default value to return if the key is not present (default to `null`)
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
@@ -621,7 +593,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Determine if this is an AJAX request
-     * @method isAjax
      * @return boolean is the request AJAX
      */
     public function isAjax()
@@ -630,7 +601,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Is the request AJAX from another domain
-     * @method isCors
      * @return boolean is this a CORS request
      */
     public function isCors()
@@ -646,7 +616,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * get the entire request as a string
-     * @method __toString
      * @return string     the messsage
      * @codeCoverageIgnore
      */
@@ -697,7 +666,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * add a checksum POST param to the request body
-     * @method addChecksum
      * @param  string      $key   the secret key
      * @param  string      $field the POST key name, defaults to `checksum`
      * @param  string      $algo  the algorythm to use, defaults to `sha1`
@@ -713,7 +681,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Validate the checksum field of the request
-     * @method validateChecksum
      * @param  string           $key   the secret key
      * @param  string           $field the POST field name, defaults to `checksum`
      * @param  string           $algo  the algorithm to use, defaults to `sha1`
@@ -727,7 +694,6 @@ class Request extends Message implements RequestInterface
     }
     /**
      * Send the request.
-     * @method send
      * @param boolean $closeConnection should a "Connection: close" header be added (defaults to true)
      * @return \vakata\http\Response the response.
      * @codeCoverageIgnore

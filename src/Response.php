@@ -74,7 +74,6 @@ class Response extends Message implements ResponseInterface
 
     /**
      * Create an instance.
-     * @method __construct
      * @param  integer      $status the status code to use
      */
     public function __construct($status = 200)
@@ -84,7 +83,6 @@ class Response extends Message implements ResponseInterface
 
     /**
      * Create an instance from a stream resource.
-     * @method fromStream
      * @param  stream   $stream a stream resource
      * @param  string   $name optional name to serve the file with
      * @return \vakata\http\Response         the response instance
@@ -120,7 +118,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Create an instance from a file.
-     * @method fromFile
      * @param  string   $file a path to a file
      * @param  string   $name optional name to serve the file with
      * @param  string   $hash optional string to use as ETag
@@ -164,7 +161,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Create an instance from an input string.
-     * @method fromString
      * @param  string     $str the stringified response
      * @return \vakata\http\Response          the response instance
      * @codeCoverageIgnore
@@ -194,7 +190,6 @@ class Response extends Message implements ResponseInterface
 
     /**
      * Add a header to the message.
-     * @method setHeader
      * @param  string    $header the header name
      * @param  string    $value  the header value
      * @return  self
@@ -211,7 +206,6 @@ class Response extends Message implements ResponseInterface
 
     /**
      * get the currently set status code
-     * @method getStatusCode
      * @return integer        the status code
      */
     public function getStatusCode()
@@ -220,7 +214,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * sets the status code
-     * @method setStatusCode
      * @param  integer        $code the new status code
      * @param  string         $reason optional reason, if not set the default will be used
      * @return  self
@@ -237,7 +230,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Set the Content-Type header by using a file extension.
-     * @method setContentTypeByExtension
      * @param  string                    $type the extension
      * @return  self
      * @codeCoverageIgnore
@@ -312,7 +304,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Make the response cacheable.
-     * @method cacheUntil
      * @param  int|string     $expires when should the request expire - either a timestamp or strtotime expression
      * @return self
      */
@@ -328,7 +319,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Enable CORS
-     * @method enableCors
      * @param  string     $origin  the host to allow CORS for, defaults to `'*'`
      * @param  string     $creds   are credentials allowed, defaults to `false`
      * @param  integer    $age     the max age, defaults to `3600`
@@ -354,7 +344,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Set a cookie
-     * @method setCookie
      * @param  string    $name  the cookie name
      * @param  string    $value the cookie value
      * @param  string    $extra optional extra params for the cookie (semicolon delimited)
@@ -367,7 +356,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Get a cookie value
-     * @method getCookie
      * @param  string    $name    the cookie name
      * @param  mixed     $default a default value to return if the cookie is not found, defaults to `null`
      * @return mixed     the cookie value (or the default if the cookie is not found)
@@ -378,7 +366,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).
-     * @method removeCookie
      * @param  string       $name the cookie name
      * @return self
      */
@@ -391,7 +378,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * Expires an existing cookie
-     * @method expireCookie
      * @param  string    $name the cookie name
      * @param  string    $extra optional extra params for the cookie (semicolon delimited)
      * @return self
@@ -403,7 +389,6 @@ class Response extends Message implements ResponseInterface
     }
     /**
      * get the entire response as a string
-     * @method __toString
      * @return string     the messsage
      * @codeCoverageIgnore
      */
@@ -425,7 +410,6 @@ class Response extends Message implements ResponseInterface
 
     /**
      * Send the response to the client.
-     * @method send
      * @param  RequestInterface|null $req  optional request object that triggered this response
      * @return self
      * @codeCoverageIgnore

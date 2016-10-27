@@ -24,7 +24,6 @@ abstract class Message implements MessageInterface
 
     /**
      * get the current HTTP version
-     * @method getProtocolVersion
      * @return string             the protocol version
      */
     public function getProtocolVersion()
@@ -33,7 +32,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * set the HTTP version to use
-     * @method setProtocolVersion
      * @param  string             $version the HTTP version to use
      * @return  self
      */
@@ -45,7 +43,6 @@ abstract class Message implements MessageInterface
 
     /**
      * Retrieve all set headers.
-     * @method getHeaders
      * @return array     all headers of the message
      */
     public function getHeaders()
@@ -54,7 +51,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * Add a header to the message.
-     * @method setHeader
      * @param  string    $header the header name
      * @param  string    $value  the header value
      * @return  self
@@ -66,7 +62,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * Is a specific header set on the message.
-     * @method hasHeader
      * @param  string    $header the header name
      * @return boolean
      */
@@ -76,7 +71,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * Retieve a header value by name.
-     * @method getHeader
      * @param  string    $header the header name
      * @return string            the header value
      */
@@ -88,7 +82,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * Remove a header from the message by name.
-     * @method removeHeader
      * @param  string       $header the header name
      * @return self
      */
@@ -99,7 +92,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * Remove all headers from the message.
-     * @method removeHeaders
      * @return self
      */
     public function removeHeaders()
@@ -110,7 +102,6 @@ abstract class Message implements MessageInterface
 
     /**
      * get the message body (as a stream resource or as a string)
-     * @method getBody
      * @param  boolean $asString should the content be returned as a string (defaults to `false`)
      * @return mixed  the body
      */
@@ -126,7 +117,6 @@ abstract class Message implements MessageInterface
     }
     /**
      * set the message body (either set to a stream resource or a string)
-     * @method setBody
      * @param  mixed  $body the body to use
      * @return self
      */

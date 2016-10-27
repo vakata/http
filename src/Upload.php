@@ -13,7 +13,6 @@ class Upload implements UploadInterface
 
     /**
      * Create an instance
-     * @method __construct
      * @param  string      $name the file name (optional - defaults to an empty string)
      * @param  string      $path the path to the file (if it is a file on the filesystem)
      * @param  stream|string      $body the contents of the file - optional (either a stream resource or string)
@@ -32,7 +31,6 @@ class Upload implements UploadInterface
     }
     /**
      * Create an instance from the current client request
-     * @method fromRequest
      * @param  string      $key the key in the $_FILES array
      * @return Upload           the instance
      * @codeCoverageIgnore
@@ -47,7 +45,6 @@ class Upload implements UploadInterface
     }
     /**
      * Returns whether the upload has a defined size.
-     * @method hasSize
      * @return boolean  whether the upload has a defined size
      */
     public function hasSize()
@@ -56,7 +53,6 @@ class Upload implements UploadInterface
     }
     /**
      * Get the size of the file.
-     * @method getSize
      * @return string  the size in bytes
      */
     public function getSize()
@@ -65,7 +61,6 @@ class Upload implements UploadInterface
     }
     /**
      * Set the file size.
-     * @method setSize
      * @param  string  $size the size
      * @return  self
      */
@@ -76,7 +71,6 @@ class Upload implements UploadInterface
     }
     /**
      * Get the name of the file.
-     * @method getName
      * @return string  the name
      */
     public function getName()
@@ -85,7 +79,6 @@ class Upload implements UploadInterface
     }
     /**
      * Set the file name.
-     * @method setName
      * @param  string  $name the name
      * @return  self
      */
@@ -96,7 +89,6 @@ class Upload implements UploadInterface
     }
     /**
      * Get the file path (if available)
-     * @method getPath
      * @return string  the path
      */
     public function getPath()
@@ -105,7 +97,6 @@ class Upload implements UploadInterface
     }
     /**
      * Set the file path (which also updates the body of the upload)
-     * @method setPath
      * @param  string  $path the path
      * @return  self
      */
@@ -134,7 +125,6 @@ class Upload implements UploadInterface
     }
     /**
      * Get the file body (as a string or as a stream resource)
-     * @method getBody
      * @param  boolean $asString should a string be returned (defaults to `false`)
      * @return stream|string            the body of the file
      */
@@ -153,7 +143,6 @@ class Upload implements UploadInterface
     }
     /**
      * Set the upload file body (either set to a stream resource or a string).
-     * @method setBody
      * @param  stream|string  $body the body to use
      * @return self
      */
@@ -174,7 +163,6 @@ class Upload implements UploadInterface
     }
     /**
      * Save the file to a location.
-     * @method saveAs
      * @param  string $dest the destination (a file system path)
      * @return bool       was the file saved
      */
@@ -201,7 +189,6 @@ class Upload implements UploadInterface
     }
     /**
      * Append the file to a location.
-     * @method appendTo
      * @param  string $dest the destination (a file system path)
      * @return bool       was the file saved
      */
