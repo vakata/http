@@ -83,13 +83,14 @@ class Response extends Message implements ResponseInterface
 
     /**
      * Create an instance from a stream resource.
-     * @param  stream   $stream a stream resource
-     * @param  string   $name optional name to serve the file with
+     * @param  resource   $stream a stream resource
+     * @param  string     $name optional name to serve the file with
      * @return \vakata\http\Response         the response instance
      * @codeCoverageIgnore
      */
     public static function fromStream($stream, $name = null)
     {
+        $res = new self();
         if (!$name) {
             $meta = stream_get_meta_data($stream);
             if (!$meta) {
@@ -100,12 +101,12 @@ class Response extends Message implements ResponseInterface
         if ($name) {
             $extension = substr($name, strrpos($name, '.') + 1);
             if ($extension) {
-                $this->setContentTypeByExtension($extension);
+                $res->setContentTypeByExtension($extension);
             }
             $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
                 'inline' :
                 'attachment';
-            $this->setHeader(
+            $res->setHeader(
                 'Content-Disposition',
                 (
                     $disposition.'; '.
@@ -114,7 +115,8 @@ class Response extends Message implements ResponseInterface
                 )
             );
         }
-        $this->setBody($stream);
+        $res->setBody($stream);
+        return $res;
     }
     /**
      * Create an instance from a file.
@@ -151,10 +153,10 @@ class Response extends Message implements ResponseInterface
                     $disposition.'; '.
                     'filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; '.
                     'filename*=UTF-8\'\''.rawurlencode($name).'; '.
-                    'size='.$size
+                    'size='.((string)$size)
                 )
             );
-            $res->setHeader('Content-Length', $size);
+            $res->setHeader('Content-Length', (string)$size);
         }
         $res->setBody(fopen($file, 'r'));
         return $res;
@@ -320,7 +322,7 @@ class Response extends Message implements ResponseInterface
     /**
      * Enable CORS
      * @param  string     $origin  the host to allow CORS for, defaults to `'*'`
-     * @param  string     $creds   are credentials allowed, defaults to `false`
+     * @param  bool       $creds   are credentials allowed, defaults to `false`
      * @param  integer    $age     the max age, defaults to `3600`
      * @param  array      $methods allowed methods, defaults to all
      * @param  array      $headers allowed headers, defaults to `['Authorization']`
@@ -335,7 +337,7 @@ class Response extends Message implements ResponseInterface
             $headers = ['Authorization'];
         }
         $this->setHeader('Access-Control-Allow-Origin', $origin);
-        $this->setHeader('Access-Control-Max-Age', $age);
+        $this->setHeader('Access-Control-Max-Age', (string)$age);
         $this->setHeader('Access-Control-Allow-Methods', implode(',', $methods));
         $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
         $this->setHeader('Access-Control-Allow-Credentials', $creds ? 'true' : 'false');

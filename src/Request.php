@@ -207,12 +207,12 @@ class Request extends Message implements RequestInterface
     }
     /**
      * set the port of the sender (useful when you are the sender and want a specific outgoing port when calling send)
-     * @param  string    $port the sender's port
+     * @param  string|int    $port the sender's port
      * @return  self
      */
     public function setSenderPort($port)
     {
-        $this->senderPort = $port;
+        $this->senderPort = (string)$port;
         return $this;
     }
     /**
@@ -279,7 +279,7 @@ class Request extends Message implements RequestInterface
     /**
      * add a file to be uploaded (as multipart form data)
      * @param  string  $key     the multipart name
-     * @param  UploadInterface|stream|string  $content the file contents
+     * @param  UploadInterface|resource|string  $content the file contents
      * @param  string  $name    the file name to submit under
      * @return  self
      */
@@ -453,7 +453,7 @@ class Request extends Message implements RequestInterface
             return $temp;
         }
         // normalize newlines
-        if (strpos($value, "\r") !== false) {
+        if (strpos((string)$value, "\r") !== false) {
             $value = str_replace(array("\r\n", "\r", "\r\n\n"), PHP_EOL, $value);
         }
         // remove invalid utf8 chars
@@ -505,7 +505,7 @@ class Request extends Message implements RequestInterface
      * @param  string    $key     the cookie name
      * @param  string    $default optional default value to return if the key is not present (default to `null`)
      * @param  string    $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
-     * @return string             the value
+     * @return string|array             the value (or values)
      */
     public function getCookie($key = null, $default = null, $mode = null)
     {
@@ -528,7 +528,7 @@ class Request extends Message implements RequestInterface
      * @param  string   $key     the GET param name
      * @param  string   $default optional default value to return if the key is not present (default to `null`)
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
-     * @return string             the value
+     * @return string|array             the value (or values)
      */
     public function getQuery($key = null, $default = null, $mode = null)
     {
@@ -573,7 +573,7 @@ class Request extends Message implements RequestInterface
      * @param  string   $key     the param name
      * @param  string   $default optional default value to return if the key is not present (default to `null`)
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
-     * @return string             the value
+     * @return string|array             the value (or values if no key was specified)
      */
     public function getPost($key = null, $default = null, $mode = null)
     {
@@ -792,10 +792,10 @@ class Request extends Message implements RequestInterface
                     $length += strlen($bndr) + 58 + strlen($key) + strlen($file->getName()) + 37 + $file->getSize() + 2;
                 }
                 $length += strlen($bndr) + 4;
-                $this->setHeader('Content-Length', $length);
+                $this->setHeader('Content-Length', (string)$length);
             } else {
                 $body = $this->getBody(true);
-                $this->setHeader('Content-Length', strlen($body));
+                $this->setHeader('Content-Length', (string)strlen($body));
             }
         }
         $this->setHeader('Host', $this->getUrl()->getHost());

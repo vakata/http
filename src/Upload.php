@@ -15,7 +15,7 @@ class Upload implements UploadInterface
      * Create an instance
      * @param  string      $name the file name (optional - defaults to an empty string)
      * @param  string      $path the path to the file (if it is a file on the filesystem)
-     * @param  stream|string      $body the contents of the file - optional (either a stream resource or string)
+     * @param  resource|string      $body the contents of the file - optional (either a stream resource or string)
      */
     public function __construct($name = '', $path = null, $body = null)
     {
@@ -53,7 +53,7 @@ class Upload implements UploadInterface
     }
     /**
      * Get the size of the file.
-     * @return string  the size in bytes
+     * @return int  the size in bytes
      */
     public function getSize()
     {
@@ -61,7 +61,7 @@ class Upload implements UploadInterface
     }
     /**
      * Set the file size.
-     * @param  string  $size the size
+     * @param  string|int  $size the size
      * @return  self
      */
     public function setSize($size)
@@ -126,7 +126,7 @@ class Upload implements UploadInterface
     /**
      * Get the file body (as a string or as a stream resource)
      * @param  boolean $asString should a string be returned (defaults to `false`)
-     * @return stream|string            the body of the file
+     * @return resource|string|null            the body of the file
      */
     public function getBody($asString = false)
     {
@@ -143,7 +143,7 @@ class Upload implements UploadInterface
     }
     /**
      * Set the upload file body (either set to a stream resource or a string).
-     * @param  stream|string  $body the body to use
+     * @param  resource|string  $body the body to use
      * @return self
      */
     public function setBody($body)
