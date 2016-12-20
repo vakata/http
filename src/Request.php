@@ -402,14 +402,14 @@ class Request extends Message implements RequestInterface
             $v[2] = $k;
             $acpt[$k] = $v;
         }
-        uasort($acpt, function ($a, $b) {
+        usort($acpt, function ($a, $b) {
             if ($a[1] > $b[1]) {
                 return -1;
             }
             if ($a[1] < $b[1]) {
                 return 1;
             }
-            return $b[2] > $b[1] ? -1 : 1;
+            return $a[2] < $b[2] ? -1 : 1;
         });
         return $acpt[0][0];
     }
@@ -430,7 +430,7 @@ class Request extends Message implements RequestInterface
             $v[2] = $k;
             $acpt[$k] = $v;
         }
-        uasort($acpt, function ($a, $b) {
+        usort($acpt, function ($a, $b) {
             if ($a[1] > $b[1]) {
                 return -1;
             }
@@ -438,7 +438,7 @@ class Request extends Message implements RequestInterface
                 return 1;
             }
 
-            return $b[2] > $b[1] ? -1 : 1;
+            return $a[2] < $b[2] ? -1 : 1;
         });
         return $acpt[0][0] == '*' ? $default : $acpt[0][0];
     }
