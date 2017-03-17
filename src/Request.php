@@ -142,34 +142,38 @@ class Request extends Message implements RequestInterface
         if (strpos($req->getHeader('Content-Type'), 'multipart') !== false) {
             $bndr = trim(explode(' boundary=', $req->getHeader('Content-Type'))[1], '"');
             $parts = explode($break . '--' . $bndr, $break . $message);
-            array_pop($parts);
-            array_shift($parts);
-            $post = [];
-            foreach ($parts as $item) {
-                list($head, $body) = explode($break . $break, $item, 2);
-                $head = explode($break, preg_replace("(" . $break . "\s+)", " ", $head));
-                foreach ($head as $h) {
-                    if (strpos(strtolower($h), 'content-disposition') === 0) {
-                        $cd = explode(';', $h);
-                        $name = '';
-                        $file = '';
-                        foreach ($cd as $p) {
-                            if (strpos(trim($p), 'name=') === 0) {
-                                $name = trim(explode('name=', $p)[1], ' "');
+            if (count($parts) == 1) {
+                $req->setBody($message);
+            } else {
+                array_pop($parts);
+                array_shift($parts);
+                $post = [];
+                foreach ($parts as $item) {
+                    list($head, $body) = explode($break . $break, $item, 2);
+                    $head = explode($break, preg_replace("(" . $break . "\s+)", " ", $head));
+                    foreach ($head as $h) {
+                        if (strpos(strtolower($h), 'content-disposition') === 0) {
+                            $cd = explode(';', $h);
+                            $name = '';
+                            $file = '';
+                            foreach ($cd as $p) {
+                                if (strpos(trim($p), 'name=') === 0) {
+                                    $name = trim(explode('name=', $p)[1], ' "');
+                                }
+                                if (strpos(trim($p), 'filename=') === 0) {
+                                    $file = trim(explode('filename=', $p)[1], ' "');
+                                }
                             }
-                            if (strpos(trim($p), 'filename=') === 0) {
-                                $file = trim(explode('filename=', $p)[1], ' "');
+                            if ($file) {
+                                $req->addUpload($name, $body, $file);
+                            } else {
+                                $post[$name] = $body;
                             }
-                        }
-                        if ($file) {
-                            $req->addUpload($name, $body, $file);
-                        } else {
-                            $post[$name] = $body;
                         }
                     }
                 }
+                $req->setBody(http_build_query($post));
             }
-            $req->setBody(http_build_query($post));
         } elseif (strlen($message)) {
             $req->setBody($message);
         }
