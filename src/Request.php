@@ -612,9 +612,9 @@ class Request extends Message implements RequestInterface
     {
         return (
             $this->hasHeader('Origin') &&
-            !$this->hasHeader('X-Requested-With') &&
             (
                 !$this->url->getHost() ||
+                strtolower(parse_url($this->getHeader('Origin'), PHP_URL_SCHEME)) !== strtolower($this->url->getScheme()) ||
                 strpos(parse_url($this->getHeader('Origin'), PHP_URL_HOST), $this->url->getHost()) === false
             )
         );
