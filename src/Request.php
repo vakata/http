@@ -362,11 +362,11 @@ class Request extends Message implements RequestInterface
             case 'basic':
                 $temp[1] = base64_decode($temp[1]);
                 $temp[1] = explode(':', $temp[1], 2);
-                return ['username' => $temp[1][0], 'password' => $temp[1][1]];
+                return ['username' => $temp[1][0], 'password' => $temp[1][1] ?? null];
             case 'token':
             case 'oauth':
             case 'bearer':
-                return ['token' => $temp[1]];
+                return ['token' => $temp[1] ?? null];
             default:
                 return null;
         }
