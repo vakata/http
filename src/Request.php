@@ -57,6 +57,9 @@ class Request extends Message implements RequestInterface
         }
 
         foreach ($headers as $key => $value) {
+            if ($this->cleanHeaderName($key) === 'Authorization' && $value === '') {
+                continue;
+            }
             $req->setHeader($key, $value);
         }
         if (strpos(strtolower($req->getHeader('Content-Type')), 'multipart/') === 0) {
