@@ -473,7 +473,7 @@ class Request extends Message implements RequestInterface
         // remove non-printable chars
         do {
             $count = 0;
-            $value = preg_replace(['/%0[0-8bcef]/', '/%1[0-9a-f]/', '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S'], '', $value, -1, $count);
+            $value = preg_replace(['/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S'], '', $value, -1, $count);
         } while ($count);
 
         switch ($mode) {
