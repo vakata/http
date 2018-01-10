@@ -2,7 +2,7 @@
 
 namespace vakata\http;
 
-use Zend\Diactoros\Uri;
+use Zend\Diactoros\Uri as ZendUri;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\UploadedFile;
 use Zend\Diactoros\ServerRequest;
@@ -32,7 +32,7 @@ class Request extends ServerRequest
         $headers = ServerRequestFactory::marshalHeaders($server);
 
         if (null === $cookies && array_key_exists('cookie', $headers)) {
-            $cookies = static::parseCookieHeader($headers['cookie']);
+            $cookies = self::parseCookieHeader($headers['cookie']);
         }
         $uri = ServerRequestFactory::marshalUriFromServer($server, $headers);
 
@@ -58,7 +58,7 @@ class Request extends ServerRequest
             $cookies ?: $_COOKIE,
             $query ?: static::fixedQueryParams($uri->getQuery()),
             $body ?: (count($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true)),
-            static::marshalProtocolVersion($server)
+            self::marshalProtocolVersion($server)
         );
     }
     public static function fromString(string $str) : Request
@@ -156,15 +156,12 @@ class Request extends ServerRequest
         $params = [];
         if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'json') !== false) {
             $params = json_decode($body, true);
-            if ($params === null) {
-                $params = [];
-            }
         } else {
             $params = static::fixedQueryParams($body);
         }
         $temp = (new Stream('php://temp', 'wb+'));
         $temp->write($body);
-        $uri = new Uri($uri);
+        $uri = new ZendUri($uri);
         return new static(
             [],
             ServerRequestFactory::normalizeFiles($files),
@@ -172,9 +169,9 @@ class Request extends ServerRequest
             $method,
             $temp,
             $headers,
-            isset($headers['Cookie']) ? static::parseCookieHeader($headers['Cookie']) : [],
+            isset($headers['Cookie']) ? self::parseCookieHeader($headers['Cookie']) : [],
             static::fixedQueryParams($uri->getQuery()),
-            $params,
+            $params ?? [],
             $version
         );
     }
@@ -221,8 +218,10 @@ class Request extends ServerRequest
 
         $cookies = [];
 
-        foreach ($matches as $match) {
-            $cookies[$match['name']] = urldecode($match['value']);
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $cookies[$match['name']] = urldecode($match['value']);
+            }
         }
 
         return $cookies;
@@ -292,7 +291,7 @@ class Request extends ServerRequest
         do {
             $count = 0;
             $value = preg_replace(['/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S'], '', $value, -1, $count);
-        } while ($count);
+        } while ((int)$count > 0);
 
         switch ($mode) {
             case 'int':
@@ -312,7 +311,6 @@ class Request extends ServerRequest
                 break;
             case 'raw':
             default:
-                $value = $value;
                 break;
         }
 
