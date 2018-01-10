@@ -153,7 +153,6 @@ class Request extends ServerRequest
             $uri = 'http://' . $uri;
         }
 
-        $params = [];
         if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'json') !== false) {
             $params = json_decode($body, true);
         } else {
