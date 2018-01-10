@@ -12,10 +12,14 @@ class Uri extends ZendUri
 
     public function __construct($uri = '', string $base = null)
     {
+        parent::__construct($uri);
+        $this->setBasePath($base);
+    }
+
+    public function setBasePath(string $base = null)
+    {
         $base = $base ?: (isset($_SERVER['PHP_SELF']) ? dirname($_SERVER['PHP_SELF']) : '/');
         $this->basePath = str_replace('//', '/', '/' . trim(str_replace('\\', '/', $base), '/') . '/');
-        parent::__construct($uri);
-
         $this->realPath = $this->getPath();
         $hasTrailingSlash = strlen($this->realPath) && substr($this->realPath, -1) === '/';
         $this->realPath = explode('?', $this->realPath, 2)[0];
@@ -32,6 +36,7 @@ class Uri extends ZendUri
         ));
         $this->segments['base'] = $this->basePath;
         $this->segments['path'] = trim($this->realPath, '/');
+        return $this;
     }
 
     public function getBasePath()
