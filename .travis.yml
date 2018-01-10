@@ -12,11 +12,8 @@ before_script:
   - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction --prefer-source
 
 script:
-  - vendor/bin/phpunit
+  - vendor/bin/phpunit --coverage-clover=coverage.clover
 
 after_script:
-  - vendor/bin/test-reporter
-
-addons:
-  code_climate:
-    repo_token: 7bc9b0e22742381a5df7c2c96a08170b35fba1476ef81fd15f14bd08acacc8f3
+    - bash -c 'wget https://scrutinizer-ci.com/ocular.phar'
+    - bash -c 'php ocular.phar code-coverage:upload --format=php-clover coverage.clover'

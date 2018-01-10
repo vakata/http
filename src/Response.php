@@ -2,243 +2,82 @@
 
 namespace vakata\http;
 
-/**
- * A class representing an HTTP response.
- */
-class Response extends Message implements ResponseInterface
+use Zend\Diactoros\Stream;
+use Zend\Diactoros\Response as PSRResponse;
+
+class Response extends PSRResponse
 {
-    protected $code = 200;
-    protected $reason = 'OK';
-    public static $statusTexts = [
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',            // RFC2518
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        203 => 'Non-Authoritative Information',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-        207 => 'Multi-Status',          // RFC4918
-        208 => 'Already Reported',      // RFC5842
-        226 => 'IM Used',               // RFC3229
-        300 => 'Multiple Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found',
-        303 => 'See Other',
-        304 => 'Not Modified',
-        305 => 'Use Proxy',
-        307 => 'Temporary Redirect',
-        308 => 'Permanent Redirect',    // RFC7238
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        402 => 'Payment Required',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication Required',
-        408 => 'Request Timeout',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Payload Too Large',
-        414 => 'URI Too Long',
-        415 => 'Unsupported Media Type',
-        416 => 'Range Not Satisfiable',
-        417 => 'Expectation Failed',
-        418 => 'I\'m a teapot',                                               // RFC2324
-        422 => 'Unprocessable Entity',                                        // RFC4918
-        423 => 'Locked',                                                      // RFC4918
-        424 => 'Failed Dependency',                                           // RFC4918
-        425 => 'Reserved for WebDAV advanced collections expired proposal',   // RFC2817
-        426 => 'Upgrade Required',                                            // RFC2817
-        428 => 'Precondition Required',                                       // RFC6585
-        429 => 'Too Many Requests',                                           // RFC6585
-        431 => 'Request Header Fields Too Large',                             // RFC6585
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Timeout',
-        505 => 'HTTP Version Not Supported',
-        506 => 'Variant Also Negotiates (Experimental)',                      // RFC2295
-        507 => 'Insufficient Storage',                                        // RFC4918
-        508 => 'Loop Detected',                                               // RFC5842
-        510 => 'Not Extended',                                                // RFC2774
-        511 => 'Network Authentication Required',                             // RFC6585
-    ];
-    protected $cookies = [];
-
-    /**
-     * Create an instance.
-     * @param  integer      $status the status code to use
-     */
-    public function __construct($status = 200)
+    public function __construct($status = 200, string $body = null, array $headers = [])
     {
-        $this->setStatusCode($status);
+        parent::__construct('php://memory', $status, $headers);
+        if ($body !== null) {
+            $this->setBody($body);
+        }
     }
-
-    /**
-     * Create an instance from a stream resource.
-     * @param  resource   $stream a stream resource
-     * @param  string     $name optional name to serve the file with
-     * @return \vakata\http\Response         the response instance
-     * @codeCoverageIgnore
-     */
-    public static function fromStream($stream, $name = null)
+    public function hasCache()
     {
-        $res = new self();
-        if (!$name) {
-            $meta = stream_get_meta_data($stream);
-            if (!$meta) {
-                throw new \Exception('Invalid stream');
-            }
-            $name = basename($meta['uri']);
-        }
-        if ($name) {
-            $extension = substr($name, strrpos($name, '.') + 1);
-            if ($extension) {
-                $res->setContentTypeByExtension($extension);
-            }
-            $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
-                'inline' :
-                'attachment';
-            $res->setHeader(
-                'Content-Disposition',
-                (
-                    $disposition.'; '.
-                    'filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; '.
-                    'filename*=UTF-8\'\''.rawurlencode($name)
-                )
-            );
-        }
-        $res->setBody($stream);
-        return $res;
+        return $this->hasHeader('Cache-Control') ||
+            $this->hasHeader('Expires') ||
+            $this->hasHeader('Last-Modified') ||
+            $this->hasHeader('ETag');
     }
     /**
-     * Create an instance from a file.
-     * @param  string   $file a path to a file
-     * @param  string   $name optional name to serve the file with
-     * @param  string   $hash optional string to use as ETag
-     * @param  string   $cached optional strtotime expression used for caching validity
-     * @return \vakata\http\Response         the response instance
-     * @codeCoverageIgnore
+     * Make the response cacheable.
+     * @param  int|string     $expires when should the request expire - either a timestamp or strtotime expression
+     * @return self
      */
-    public static function fromFile($file, $name = null, $hash = null, $cached = null)
+    public function cacheUntil($expires)
     {
-        $res = new self();
-        $name = $name ?: basename($file);
-        $size = filesize($file);
-        if ($name) {
-            $extension = substr($name, strrpos($name, '.') + 1);
-            if ($extension) {
-                $res->setContentTypeByExtension($extension);
-            }
-            $res->setHeader('Last-Modified', gmdate('D, d M Y H:i:s', filemtime($file)).' GMT');
-            if ($hash !== null) {
-                $res->setHeader('ETag', $hash);
-            }
-            if ($cached !== null) {
-                $res->cacheUntil($cached);
-            }
-            $disposition = in_array(strtolower($extension), ['txt','png','jpg','gif','jpeg','html','htm','mp3','mp4']) ?
-                'inline' :
-                'attachment';
-            $res->setHeader(
-                'Content-Disposition',
-                (
-                    $disposition.'; '.
-                    'filename="'.preg_replace('([^a-z0-9.-]+)i', '_', $name).'"; '.
-                    'filename*=UTF-8\'\''.rawurlencode($name).'; '.
-                    'size='.((string)$size)
-                )
-            );
-            $res->setHeader('Content-Length', (string)$size);
+        if (!is_int($expires)) {
+            $expires = strtotime($expires);
         }
-        $res->setBody(fopen($file, 'r'));
-        return $res;
+        return $this
+            ->withHeader('Pragma', 'public')
+            ->withHeader('Cache-Control', 'maxage='.($expires - time()))
+            ->withHeader('Expires', gmdate('D, d M Y H:i:s', $expires).' GMT');
     }
     /**
-     * Create an instance from an input string.
-     * @param  string     $str the stringified response
-     * @return \vakata\http\Response          the response instance
-     * @codeCoverageIgnore
+     * Prevent caching
+     *
+     * @return self
      */
-    public static function fromString($str)
+    public function noCache()
     {
-        $res = new self();
-        $break = strpos($str, "\r\n\r\n") === false ? "\n" : "\r\n"; // just in case someone breaks RFC 2616
-        list($headers, $message) = explode($break . $break, (string)$str, 2);
-        $headers = explode($break, preg_replace("(" . $break . "\s+)", " ", $headers));
-        if (isset($headers[0]) && substr($headers[0], 0, 5) === 'HTTP/') {
-            $temp = explode(' ', substr($headers[0], 5));
-            $res->setProtocolVersion($temp[0]);
-            $res->setStatusCode((int)$temp[1]);
-            unset($headers[0]);
-            $headers = array_values($headers);
-        }
-        foreach (array_filter($headers) as $v) {
-            $v = explode(':', $v, 2);
-            $res->setHeader(trim($v[0]), trim($v[1]));
-        }
-        $res->setBody($message);
-        $res->removeHeader('Content-Length');
-        $res->removeHeader('Transfer-Encoding');
-        return $res;
+        return $this
+            ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+            ->withHeader('Expires', gmdate('D, d M Y H:i:s', 0).' GMT');
     }
-
+    public function setBody(string $body)
+    {
+        $temp = (new Stream('php://temp', 'wb+'));
+        $temp->write($body);
+        return $this->withBody($temp);
+    }
     /**
-     * Add a header to the message.
-     * @param  string    $header the header name
-     * @param  string    $value  the header value
+     * Set a cookie
+     * @param  string    $name  the cookie name
+     * @param  string    $value the cookie value
+     * @param  string    $extra optional extra params for the cookie (semicolon delimited)
      * @return  self
      */
-    public function setHeader($header, $value)
+    public function withCookie($name, $value, $extra = '')
     {
-        $header = $this->cleanHeaderName($header);
-        $this->headers[$header] = $value;
-        if ($header === 'Status') {
-            $this->code = (int)trim($value);
-        }
-        return $this;
-    }
-
-    /**
-     * get the currently set status code
-     * @return integer        the status code
-     */
-    public function getStatusCode()
-    {
-        return $this->code;
+        return $this->withAddedHeader('Set-Cookie', $name . '=' . urlencode($value) . '; ' . $extra);
     }
     /**
-     * sets the status code
-     * @param  integer        $code the new status code
-     * @param  string         $reason optional reason, if not set the default will be used
-     * @return  self
+     * Expires an existing cookie
+     * @param  string    $name the cookie name
+     * @param  string    $extra optional extra params for the cookie (semicolon delimited)
+     * @return self
      */
-    public function setStatusCode($code, $reason = '')
+    public function expireCookie($name, $extra = '')
     {
-        if (!$reason && isset(self::$statusTexts[$code])) {
-            $reason = self::$statusTexts[$code];
-        }
-        $this->code = $code;
-        $this->reason = $reason;
-        $this->setHeader('Status', $code . ' ' . $reason);
-        return $this;
+        $extra = implode('; ', array_filter([ $extra, 'Expires=' . date('r', 0) ]));
+        return $this->withCookie($name, 'deleted', $extra);
     }
-    /**
-     * Set the Content-Type header by using a file extension.
-     * @param  string                    $type the extension
-     * @return  self
-     * @codeCoverageIgnore
-     */
-    public function setContentTypeByExtension($type)
+    public function setContentTypeByExtension(string $extension)
     {
-        switch (strtolower($type)) {
+        switch (strtolower($extension)) {
             case "txt":
             case "text":
                 $type = "text/plain; charset=UTF-8";
@@ -299,191 +138,9 @@ class Response extends Message implements ResponseInterface
                 $type = "text/html; charset=UTF-8";
                 break;
             default:
-                return;
+                $type = "application/binary";
+                break;
         }
-        $this->setHeader('Content-Type', $type);
-        return $this;
-    }
-    /**
-     * Make the response cacheable.
-     * @param  int|string     $expires when should the request expire - either a timestamp or strtotime expression
-     * @return self
-     */
-    public function cacheUntil($expires)
-    {
-        if (!is_int($expires)) {
-            $expires = strtotime($expires);
-        }
-        $this->setHeader('Pragma', 'public');
-        $this->setHeader('Cache-Control', 'maxage='.($expires - time()));
-        $this->setHeader('Expires', gmdate('D, d M Y H:i:s', $expires).' GMT');
-        return $this;
-    }
-    /**
-     * Enable CORS
-     * @param  string     $origin  the host to allow CORS for, defaults to `'*'`
-     * @param  bool       $creds   are credentials allowed, defaults to `false`
-     * @param  integer    $age     the max age, defaults to `3600`
-     * @param  array      $methods allowed methods, defaults to all
-     * @param  array      $headers allowed headers, defaults to `['Authorization']`
-     * @return self
-     */
-    public function enableCors($origin = '*', $creds = false, $age = 3600, array $methods = null, array $headers = null)
-    {
-        if ($methods === null) {
-            $methods = ['GET','POST','PUT','PATCH','HEAD','DELETE'];
-        }
-        if ($headers === null) {
-            $headers = ['Authorization'];
-        }
-        $this->setHeader('Access-Control-Allow-Origin', $origin);
-        $this->setHeader('Access-Control-Max-Age', (string)$age);
-        $this->setHeader('Access-Control-Allow-Methods', implode(',', $methods));
-        $this->setHeader('Access-Control-Allow-Headers', implode(', ', $headers));
-        $this->setHeader('Access-Control-Allow-Credentials', $creds ? 'true' : 'false');
-
-        return $this;
-    }
-    /**
-     * Set a cookie
-     * @param  string    $name  the cookie name
-     * @param  string    $value the cookie value
-     * @param  string    $extra optional extra params for the cookie (semicolon delimited)
-     * @return  self
-     */
-    public function setCookie($name, $value, $extra = '')
-    {
-        $this->cookies[$name] = [ $value, $extra ];
-        return $this;
-    }
-    /**
-     * Get a cookie value
-     * @param  string    $name    the cookie name
-     * @param  mixed     $default a default value to return if the cookie is not found, defaults to `null`
-     * @return mixed     the cookie value (or the default if the cookie is not found)
-     */
-    public function getCookie($name, $default = null)
-    {
-        return isset($this->cookies[$name]) ? $this->cookies[$name][0] : $default;
-    }
-    /**
-     * Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).
-     * @param  string       $name the cookie name
-     * @return self
-     */
-    public function removeCookie($name)
-    {
-        if (isset($this->cookies[$name])) {
-            unset($this->cookies[$name]);
-        }
-        return $this;
-    }
-    /**
-     * Expires an existing cookie
-     * @param  string    $name the cookie name
-     * @param  string    $extra optional extra params for the cookie (semicolon delimited)
-     * @return self
-     */
-    public function expireCookie($name, $extra = '')
-    {
-        $extra = implode('; ', array_filter([ $extra, 'Expires=' . date('r', 0) ]));
-        return $this->setCookie($name, 'deleted', $extra);
-    }
-    /**
-     * get the entire response as a string
-     * @return string     the messsage
-     * @codeCoverageIgnore
-     */
-    public function __toString()
-    {
-        $message = 'HTTP/' . $this->getProtocolVersion() . ' ' . $this->code . ' ' . $this->reason . "\r\n";
-        $headers = [];
-        foreach ($this->headers as $k => $v) {
-            $headers[] = $k . ': ' . $v;
-        }
-        foreach ($this->cookies as $k => $v) {
-            $headers[] = 'Set-Cookie: ' . $k . '=' . urlencode($v[0]) . '; ' . $v[1];
-        }
-        $message .= implode("\r\n", $headers);
-        $message .= "\r\n\r\n";
-        $message .= $this->getBody(true);
-        return $message;
-    }
-
-    /**
-     * Send the response to the client.
-     * @param  RequestInterface|null $req  optional request object that triggered this response
-     * @return self
-     * @codeCoverageIgnore
-     */
-    public function send(RequestInterface $req = null)
-    {
-        $seekBeg = 0;
-        $seekEnd = -1;
-
-        // modify response according to request
-        if ($req) {
-            // process cached response (not modified)
-            if ($req->hasHeader('If-Modified-Since') && $this->hasHeader('Last-Modified')) {
-                $cached = strtotime($req->getHeader('If-Modified-Since'));
-                $current = strtotime($this->getHeader('Last-Modified'));
-                if ($cached === $current) {
-                    $this->setStatusCode(304);
-                }
-            }
-            // process cached response (ETag)
-            if ($req->hasHeader('If-None-Match') && $this->hasHeader('ETag')) {
-                if ($req->getHeader('If-None-Match') === $this->getHeader('ETag')) {
-                    $this->setStatusCode(304);
-                }
-            }
-            // process chunks
-            if ($req->hasHeader('Range') && $this->hasHeader('Content-Length')) {
-                $size = (int)$this->getHeader('Content-Length');
-                $range = $req->getHeader('Range');
-                $this->setHeader('Accept-Ranges', 'bytes');
-                try {
-                    if (!preg_match('@^bytes=\d*-\d*(,\d*-\d*)*$@', $range)) {
-                        throw new \Exception('Invalid range');
-                    }
-                    $range = current(explode(',', substr($range, 6)));
-                    list($seekBeg, $seekEnd) = explode('-', $range, 2);
-                    $seekBeg = max((int)$seekBeg, 0);
-                    $seekEnd = !(int)$seekEnd ? ($size - 1) : min((int)$seekEnd, ($size - 1));
-                    if ($seekBeg > $seekEnd) {
-                        throw new \Exception('Invalid range');
-                    }
-                    $this->setStatusCode(206);
-                    $this->setHeader('Content-Range', 'bytes '.$seekBeg.'-'.$seekEnd.'/'.$size);
-                    $seekEnd = ($seekEnd - $seekBeg);
-                } catch (\Exception $e) {
-                    $this->setStatusCode(416);
-                    $this->setHeader('Content-Range', 'bytes * /'.$size);
-                    $this->body = null;
-                }
-            }
-        }
-        if (!headers_sent()) {
-            if ($this->getHeader('Location') &&
-                $this->code !== 201 &&
-                $this->code !== 202 &&
-                floor($this->code / 100) !== 3
-            ) {
-                $this->setStatusCode(302);
-            }
-            http_response_code($this->code);
-            foreach ($this->getHeaders() as $k => $v) {
-                header($k . ': ' . $v);
-            }
-            foreach ($this->cookies as $k => $v) {
-                header('Set-Cookie: ' . $k . '=' . urlencode($v[0]) . '; ' . $v[1], false);
-            }
-        }
-        if ($this->body && (!in_array($this->getStatusCode(), [204,304,416])) && (!$req || $req->getMethod() !== 'HEAD')) {
-            $out = fopen('php://output', 'w');
-            stream_copy_to_stream($this->body, $out, $seekEnd, $seekBeg);
-            fclose($out);
-        }
-        return $this;
+        return $this->withHeader('Content-Type', $type);
     }
 }

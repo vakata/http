@@ -1,520 +1,214 @@
-# vakata\http\Response
-A class representing an HTTP response.
+# vakata\http\Response  
+
+
+
+## Implements:
+Psr\Http\Message\MessageInterface, Psr\Http\Message\ResponseInterface
+
+## Extend:
+
+Zend\Diactoros\Response
 
 ## Methods
 
 | Name | Description |
 |------|-------------|
-|[__construct](#vakata\http\response__construct)|Create an instance.|
-|[fromStream](#vakata\http\responsefromstream)|Create an instance from a stream resource.|
-|[fromFile](#vakata\http\responsefromfile)|Create an instance from a file.|
-|[fromString](#vakata\http\responsefromstring)|Create an instance from an input string.|
-|[setHeader](#vakata\http\responsesetheader)|Add a header to the message.|
-|[getStatusCode](#vakata\http\responsegetstatuscode)|get the currently set status code|
-|[setStatusCode](#vakata\http\responsesetstatuscode)|sets the status code|
-|[setContentTypeByExtension](#vakata\http\responsesetcontenttypebyextension)|Set the Content-Type header by using a file extension.|
-|[cacheUntil](#vakata\http\responsecacheuntil)|Make the response cacheable.|
-|[enableCors](#vakata\http\responseenablecors)|Enable CORS|
-|[setCookie](#vakata\http\responsesetcookie)|Set a cookie|
-|[getCookie](#vakata\http\responsegetcookie)|Get a cookie value|
-|[removeCookie](#vakata\http\responseremovecookie)|Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).|
-|[expireCookie](#vakata\http\responseexpirecookie)|Expires an existing cookie|
-|[__toString](#vakata\http\response__tostring)|get the entire response as a string|
-|[send](#vakata\http\responsesend)|Send the response to the client.|
-|[getProtocolVersion](#vakata\http\responsegetprotocolversion)|get the current HTTP version|
-|[setProtocolVersion](#vakata\http\responsesetprotocolversion)|set the HTTP version to use|
-|[getHeaders](#vakata\http\responsegetheaders)|Retrieve all set headers.|
-|[hasHeader](#vakata\http\responsehasheader)|Is a specific header set on the message.|
-|[getHeader](#vakata\http\responsegetheader)|Retieve a header value by name.|
-|[removeHeader](#vakata\http\responseremoveheader)|Remove a header from the message by name.|
-|[removeHeaders](#vakata\http\responseremoveheaders)|Remove all headers from the message.|
-|[getBody](#vakata\http\responsegetbody)|get the message body (as a stream resource or as a string)|
-|[setBody](#vakata\http\responsesetbody)|set the message body (either set to a stream resource or a string)|
+|[cacheUntil](#responsecacheuntil)|Make the response cacheable.|
+|[expireCookie](#responseexpirecookie)|Expires an existing cookie|
+|[hasCache](#responsehascache)||
+|[noCache](#responsenocache)|Prevent caching|
+|[setBody](#responsesetbody)||
+|[setContentTypeByExtension](#responsesetcontenttypebyextension)||
+|[withCookie](#responsewithcookie)|Set a cookie|
 
----
+## Inherited methods
 
-
-
-### vakata\http\Response::__construct
-Create an instance.  
+| Name | Description |
+|------|-------------|
+|__construct|-|
+|getBody|Gets the body of the message.|
+|getHeader|Retrieves a message header value by the given case-insensitive name.|
+|getHeaderLine|Retrieves a comma-separated string of the values for a single header.|
+|getHeaders|Retrieves all message headers.|
+|getProtocolVersion|Retrieves the HTTP protocol version as a string.|
+|getReasonPhrase|{@inheritdoc}|
+|getStatusCode|{@inheritdoc}|
+|hasHeader|Checks if a header exists by the given case-insensitive name.|
+|withAddedHeader|Return an instance with the specified header appended with the
+given value.|
+|withBody|Return an instance with the specified message body.|
+|withHeader|Return an instance with the provided header, replacing any existing
+values of any headers with the same case-insensitive name.|
+|withProtocolVersion|Return an instance with the specified HTTP protocol version.|
+|withStatus|{@inheritdoc}|
+|withoutHeader|Return an instance without the specified header.|
 
 
-```php
-public function __construct (  
-    integer $status  
-)   
-```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$status` | `integer` | the status code to use |
+### Response::cacheUntil  
 
----
-
-
-### vakata\http\Response::fromStream
-Create an instance from a stream resource.  
-
+**Description**
 
 ```php
-public static function fromStream (  
-    \stream $stream,  
-    string $name  
-) : \vakata\http\Response    
+public cacheUntil (int|string $expires)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$stream` | `\stream` | a stream resource |
-| `$name` | `string` | optional name to serve the file with |
-|  |  |  |
-| `return` | [`\vakata\http\Response`](Response.md) | the response instance |
+Make the response cacheable. 
 
----
+ 
+
+**Parameters**
+
+* `(int|string) $expires`
+: when should the request expire - either a timestamp or strtotime expression  
+
+**Return Values**
+
+`self`
 
 
-### vakata\http\Response::fromFile
-Create an instance from a file.  
 
+
+
+### Response::expireCookie  
+
+**Description**
 
 ```php
-public static function fromFile (  
-    string $file,  
-    string $name,  
-    string $hash,  
-    string $cached  
-) : \vakata\http\Response    
+public expireCookie (string $name, string $extra)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$file` | `string` | a path to a file |
-| `$name` | `string` | optional name to serve the file with |
-| `$hash` | `string` | optional string to use as ETag |
-| `$cached` | `string` | optional strtotime expression used for caching validity |
-|  |  |  |
-| `return` | [`\vakata\http\Response`](Response.md) | the response instance |
+Expires an existing cookie 
 
----
+ 
+
+**Parameters**
+
+* `(string) $name`
+: the cookie name  
+* `(string) $extra`
+: optional extra params for the cookie (semicolon delimited)  
+
+**Return Values**
+
+`self`
 
 
-### vakata\http\Response::fromString
-Create an instance from an input string.  
 
+
+
+### Response::hasCache  
+
+**Description**
 
 ```php
-public static function fromString (  
-    string $str  
-) : \vakata\http\Response    
+public hasCache (void)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$str` | `string` | the stringified response |
-|  |  |  |
-| `return` | [`\vakata\http\Response`](Response.md) | the response instance |
+ 
 
----
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
 
 
-### vakata\http\Response::setHeader
-Add a header to the message.  
 
+
+### Response::noCache  
+
+**Description**
 
 ```php
-public function setHeader (  
-    string $header,  
-    string $value  
-) : self    
+public noCache (void)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$header` | `string` | the header name |
-| `$value` | `string` | the header value |
-|  |  |  |
-| `return` | `self` |  |
+Prevent caching 
 
----
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`self`
 
 
-### vakata\http\Response::getStatusCode
-get the currently set status code  
 
+
+
+### Response::setBody  
+
+**Description**
 
 ```php
-public function getStatusCode () : integer    
+public setBody (void)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-|  |  |  |
-| `return` | `integer` | the status code |
+ 
 
----
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
 
 
-### vakata\http\Response::setStatusCode
-sets the status code  
 
+
+### Response::setContentTypeByExtension  
+
+**Description**
 
 ```php
-public function setStatusCode (  
-    integer $code,  
-    string $reason  
-) : self    
+public setContentTypeByExtension (void)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$code` | `integer` | the new status code |
-| `$reason` | `string` | optional reason, if not set the default will be used |
-|  |  |  |
-| `return` | `self` |  |
+ 
 
----
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
 
 
-### vakata\http\Response::setContentTypeByExtension
-Set the Content-Type header by using a file extension.  
 
+
+### Response::withCookie  
+
+**Description**
 
 ```php
-public function setContentTypeByExtension (  
-    string $type  
-) : self    
+public withCookie (string $name, string $value, string $extra)
 ```
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$type` | `string` | the extension |
-|  |  |  |
-| `return` | `self` |  |
+Set a cookie 
 
----
+ 
 
+**Parameters**
 
-### vakata\http\Response::cacheUntil
-Make the response cacheable.  
+* `(string) $name`
+: the cookie name  
+* `(string) $value`
+: the cookie value  
+* `(string) $extra`
+: optional extra params for the cookie (semicolon delimited)  
 
+**Return Values**
 
-```php
-public function cacheUntil (  
-    int|string $expires  
-) : self    
-```
+`self`
 
-|  | Type | Description |
-|-----|-----|-----|
-| `$expires` | `int`, `string` | when should the request expire - either a timestamp or strtotime expression |
-|  |  |  |
-| `return` | `self` |  |
 
----
 
-
-### vakata\http\Response::enableCors
-Enable CORS  
-
-
-```php
-public function enableCors (  
-    string $origin,  
-    string $creds,  
-    integer $age,  
-    array $methods,  
-    array $headers  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$origin` | `string` | the host to allow CORS for, defaults to `'*'` |
-| `$creds` | `string` | are credentials allowed, defaults to `false` |
-| `$age` | `integer` | the max age, defaults to `3600` |
-| `$methods` | `array` | allowed methods, defaults to all |
-| `$headers` | `array` | allowed headers, defaults to `['Authorization']` |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::setCookie
-Set a cookie  
-
-
-```php
-public function setCookie (  
-    string $name,  
-    string $value,  
-    string $extra  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$name` | `string` | the cookie name |
-| `$value` | `string` | the cookie value |
-| `$extra` | `string` | optional extra params for the cookie (semicolon delimited) |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::getCookie
-Get a cookie value  
-
-
-```php
-public function getCookie (  
-    string $name,  
-    mixed $default  
-) : mixed    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$name` | `string` | the cookie name |
-| `$default` | `mixed` | a default value to return if the cookie is not found, defaults to `null` |
-|  |  |  |
-| `return` | `mixed` | the cookie value (or the default if the cookie is not found) |
-
----
-
-
-### vakata\http\Response::removeCookie
-Remove a cookie (does not expire an existing cookie, simply prevents it from being sent).  
-
-
-```php
-public function removeCookie (  
-    string $name  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$name` | `string` | the cookie name |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::expireCookie
-Expires an existing cookie  
-
-
-```php
-public function expireCookie (  
-    string $name,  
-    string $extra  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$name` | `string` | the cookie name |
-| `$extra` | `string` | optional extra params for the cookie (semicolon delimited) |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::__toString
-get the entire response as a string  
-
-
-```php
-public function __toString ()   
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-
----
-
-
-### vakata\http\Response::send
-Send the response to the client.  
-
-
-```php
-public function send (  
-    \RequestInterface|null $req  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$req` | `\RequestInterface`, `null` | optional request object that triggered this response |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::getProtocolVersion
-get the current HTTP version  
-
-
-```php
-public function getProtocolVersion () : string    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-|  |  |  |
-| `return` | `string` | the protocol version |
-
----
-
-
-### vakata\http\Response::setProtocolVersion
-set the HTTP version to use  
-
-
-```php
-public function setProtocolVersion (  
-    string $version  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$version` | `string` | the HTTP version to use |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::getHeaders
-Retrieve all set headers.  
-
-
-```php
-public function getHeaders () : array    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-|  |  |  |
-| `return` | `array` | all headers of the message |
-
----
-
-
-### vakata\http\Response::hasHeader
-Is a specific header set on the message.  
-
-
-```php
-public function hasHeader (  
-    string $header  
-) : boolean    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$header` | `string` | the header name |
-|  |  |  |
-| `return` | `boolean` |  |
-
----
-
-
-### vakata\http\Response::getHeader
-Retieve a header value by name.  
-
-
-```php
-public function getHeader (  
-    string $header  
-) : string    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$header` | `string` | the header name |
-|  |  |  |
-| `return` | `string` | the header value |
-
----
-
-
-### vakata\http\Response::removeHeader
-Remove a header from the message by name.  
-
-
-```php
-public function removeHeader (  
-    string $header  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$header` | `string` | the header name |
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::removeHeaders
-Remove all headers from the message.  
-
-
-```php
-public function removeHeaders () : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-|  |  |  |
-| `return` | `self` |  |
-
----
-
-
-### vakata\http\Response::getBody
-get the message body (as a stream resource or as a string)  
-
-
-```php
-public function getBody (  
-    boolean $asString  
-) : mixed    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$asString` | `boolean` | should the content be returned as a string (defaults to `false`) |
-|  |  |  |
-| `return` | `mixed` | the body |
-
----
-
-
-### vakata\http\Response::setBody
-set the message body (either set to a stream resource or a string)  
-
-
-```php
-public function setBody (  
-    mixed $body  
-) : self    
-```
-
-|  | Type | Description |
-|-----|-----|-----|
-| `$body` | `mixed` | the body to use |
-|  |  |  |
-| `return` | `self` |  |
-
----
 

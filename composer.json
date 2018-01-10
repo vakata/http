@@ -1,6 +1,6 @@
 {
     "name": "vakata/http",
-    "description": "HTTP Request / Response classes",
+    "description": "HTTP Request / Response classes (extending zend/diactoros with a few methods)",
     "keywords": [
         "vakata",
         "http"
@@ -15,18 +15,12 @@
             "role": "Developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/vakata/phpdoc-md"
-        }
-    ],
     "require": {
-        "php" : ">=5.4.0"
+        "php" : ">=7.0.0",
+        "zendframework/zend-diactoros": "~1.7"
     },
     "require-dev": {
         "phpunit/phpunit" : "4.*",
-        "codeclimate/php-test-reporter": "dev-master",
         "clean/phpdoc-md": "dev-master"
     },
     "autoload": {
@@ -41,7 +35,6 @@
     },
     "scripts": {
         "test": "phpunit",
-        "psr2": "php-cs-fixer fix ./src",
         "phpdoc": "phpdoc-md"
     }
 }
