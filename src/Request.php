@@ -327,7 +327,7 @@ class Request extends ServerRequest
      * @param  string    $key     the cookie name
      * @param  mixed     $default optional default value to return if the key is not present (default to `null`)
      * @param  string    $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
-     * @return string|array             the value (or values)
+     * @return mixed             the value (or values)
      */
     public function getCookie($key = null, $default = null, $mode = null)
     {
@@ -338,7 +338,7 @@ class Request extends ServerRequest
      * @param  string   $key     the GET param name
      * @param  mixed    $default optional default value to return if the key is not present (default to `null`)
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
-     * @return string|array             the value (or values)
+     * @return mixed             the value (or values)
      */
     public function getQuery($key = null, $default = null, $mode = null)
     {
@@ -349,7 +349,7 @@ class Request extends ServerRequest
      * @param  string   $key     the param name
      * @param  mixed    $default optional default value to return if the key is not present (default to `null`)
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
-     * @return string|array             the value (or values if no key was specified)
+     * @return mixed             the value (or values if no key was specified)
      */
     public function getPost($key = null, $default = null, $mode = null)
     {
