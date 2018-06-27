@@ -27,14 +27,14 @@ class Request extends ServerRequest
         array $cookies = null,
         array $files = null
     ) {
-        $server  = ServerRequestFactory::normalizeServer($server ?: $_SERVER);
-        $files   = ServerRequestFactory::normalizeFiles($files ?: $_FILES);
-        $headers = ServerRequestFactory::marshalHeaders($server);
+        $server  = \Zend\Diactoros\normalizeServer($server ?: $_SERVER);
+        $files   = \Zend\Diactoros\normalizeUploadedFiles($files ?: $_FILES);
+        $headers = \Zend\Diactoros\marshalHeadersFromSapi($server);
 
         if (null === $cookies && array_key_exists('cookie', $headers)) {
             $cookies = self::parseCookieHeader($headers['cookie']);
         }
-        $uri = ServerRequestFactory::marshalUriFromServer($server, $headers);
+        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
 
         if ($body === null) {
             $body = [];
@@ -58,7 +58,7 @@ class Request extends ServerRequest
             $cookies ?: $_COOKIE,
             $query ?: static::fixedQueryParams($uri->getQuery()),
             $body ?: (count($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true)),
-            self::marshalProtocolVersion($server)
+            \Zend\Diactoros\marshalProtocolVersionFromSapi($server)
         );
     }
     public static function fromString(string $str) : Request
@@ -163,7 +163,7 @@ class Request extends ServerRequest
         $uri = new ZendUri($uri);
         return new static(
             [],
-            ServerRequestFactory::normalizeFiles($files),
+            \Zend\Diactoros\normalizeUploadedFiles($files),
             $uri,
             $method,
             $temp,
@@ -224,21 +224,6 @@ class Request extends ServerRequest
         }
 
         return $cookies;
-    }
-    private static function marshalProtocolVersion(array $server)
-    {
-        if (! isset($server['SERVER_PROTOCOL'])) {
-            return '1.1';
-        }
-
-        if (! preg_match('#^(HTTP/)?(?P<version>[1-9]\d*(?:\.\d)?)$#', $server['SERVER_PROTOCOL'], $matches)) {
-            throw new \Exception(sprintf(
-                'Unrecognized protocol version (%s)',
-                $server['SERVER_PROTOCOL']
-            ));
-        }
-
-        return $matches['version'];
     }
     public function __construct(
         array $serverParams = [],
@@ -525,6 +510,6 @@ class Request extends ServerRequest
      */
     public function getUri()
     {
-        return $this->uri;
+        return parent::getUri();
     }
 }
