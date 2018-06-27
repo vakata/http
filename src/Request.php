@@ -518,4 +518,13 @@ class Request extends ServerRequest
         }
         return $default;
     }
+    /**
+     * Retrieves the URI instance.
+     * 
+     * @return \vakata\http\Uri Returns a Uri instance
+     */
+    public function getUri()
+    {
+        return $this->uri;
+    }
 }
