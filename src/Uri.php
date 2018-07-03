@@ -50,7 +50,7 @@ class Uri extends ZendUri
     public function getSegment($index, $default = null)
     {
         if (is_numeric($index) && (int)$index < 0) {
-            $index = count($this->segments) + $index;
+            $index = count($this->segments) - 2 + $index; // -2 to avoid "base" and "path"
         }
         return $this->segments[$index] ?? $default;
     }
