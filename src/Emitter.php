@@ -116,7 +116,7 @@ class Emitter
         $this->emitStatusLine($response);
         
         if ($response->hasCallback()) {
-            call_user_func_array($response->getCallback());
+            call_user_func($response->getCallback());
         } elseif ($response->hasHeader('Accept-Ranges')) {
             $range = $this->parseContentRange($response->getHeaderLine('Content-Range'));
             if (is_array($range) && $range[0] === 'bytes') {
