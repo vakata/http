@@ -7,6 +7,8 @@ use Zend\Diactoros\Response as PSRResponse;
 
 class Response extends PSRResponse
 {
+    protected $callback = null;
+
     public function __construct($status = 200, string $body = null, array $headers = [])
     {
         parent::__construct('php://memory', $status, $headers);
@@ -142,5 +144,23 @@ class Response extends PSRResponse
                 break;
         }
         return $this->withHeader('Content-Type', $type);
+    }
+
+    public function withCallback(callable $callback = null)
+    {
+        return $this->setBody('')->setCallback($callback);
+    }
+    protected function setCallback(callable $callback = null)
+    {
+        $this->callback = $callback;
+        return $this;
+    }
+    public function hasCallback()
+    {
+        return $this->callback !== null;
+    }
+    public function getCallback()
+    {
+        return $this->callback;
     }
 }
