@@ -30,11 +30,13 @@ class Request extends ServerRequest
         $server  = \Zend\Diactoros\normalizeServer($server ?: $_SERVER);
         $files   = \Zend\Diactoros\normalizeUploadedFiles($files ?: $_FILES);
         $headers = \Zend\Diactoros\marshalHeadersFromSapi($server);
+        $method  = \Zend\Diactoros\marshalMethodFromSapi($server);
+        $uri     = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
 
         if (null === $cookies && array_key_exists('cookie', $headers)) {
             $cookies = self::parseCookieHeader($headers['cookie']);
         }
-        $uri = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
+        
 
         if ($body === null) {
             $body = [];
@@ -52,7 +54,7 @@ class Request extends ServerRequest
             $server,
             $files,
             $uri,
-            ServerRequestFactory::get('REQUEST_METHOD', $server, 'GET'),
+            $method,
             'php://input',
             $headers,
             $cookies ?: $_COOKIE,
@@ -502,14 +504,5 @@ class Request extends ServerRequest
             }
         }
         return $default;
-    }
-    /**
-     * Retrieves the URI instance.
-     * 
-     * @return \vakata\http\Uri Returns a Uri instance
-     */
-    public function getUri()
-    {
-        return parent::getUri();
     }
 }
