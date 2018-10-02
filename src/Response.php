@@ -11,10 +11,13 @@ class Response extends PSRResponse
 
     public function __construct($status = 200, string $body = null, array $headers = [])
     {
-        parent::__construct('php://memory', $status, $headers);
         if ($body !== null) {
-            $this->setBody($body);
+            $temp = (new Stream('php://temp', 'wb+'));
+            $temp->write($body);
+        } else {
+            $temp = 'php://memory';
         }
+        parent::__construct($temp, $status, $headers);
     }
     public function hasCache()
     {
