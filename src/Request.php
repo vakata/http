@@ -29,7 +29,26 @@ class Request extends ServerRequest
     ) {
         $server  = \Zend\Diactoros\normalizeServer($server ?: $_SERVER);
         $files   = \Zend\Diactoros\normalizeUploadedFiles($files ?: $_FILES);
-        $headers = \Zend\Diactoros\marshalHeadersFromSapi($server);
+        $headers = [];
+        foreach ($server as $key => $value) {
+            if (strpos($key, 'REDIRECT_') === 0) {
+                $key = substr($key, 9);
+                if (array_key_exists($key, $server)) {
+                    continue;
+                }
+            }
+            if (strlen($value) && strpos($key, 'HTTP_') === 0) {
+                $name = strtr(strtolower(substr($key, 5)), '_', '-');
+                $headers[$name] = $value;
+                continue;
+            }
+            if (strlen($value) && strpos($key, 'CONTENT_') === 0) {
+                $name = 'content-' . strtolower(substr($key, 8));
+                $headers[$name] = $value;
+                continue;
+            }
+        }
+
         $method  = \Zend\Diactoros\marshalMethodFromSapi($server);
         $uri     = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
 
