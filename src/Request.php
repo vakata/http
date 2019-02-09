@@ -388,6 +388,10 @@ class Request extends ServerRequest
                 return null;
         }
     }
+    /**
+     * Get the Uri object
+     * @return Uri
+     */
     public function getUrl()
     {
         return $this->getUri();
