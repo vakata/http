@@ -37,12 +37,12 @@ class Request extends ServerRequest
                     continue;
                 }
             }
-            if (strlen($value) && strpos($key, 'HTTP_') === 0) {
+            if (is_string($value) && strlen($value) && strpos($key, 'HTTP_') === 0) {
                 $name = strtr(strtolower(substr($key, 5)), '_', '-');
                 $headers[$name] = $value;
                 continue;
             }
-            if (strlen($value) && strpos($key, 'CONTENT_') === 0) {
+            if (is_string($value) && strlen($value) && strpos($key, 'CONTENT_') === 0) {
                 $name = 'content-' . strtolower(substr($key, 8));
                 $headers[$name] = $value;
                 continue;
