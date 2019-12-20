@@ -10,8 +10,8 @@ use Zend\Diactoros\ServerRequestFactory;
 
 class Request extends ServerRequest
 {
-    protected $certficateNumber;
-    protected $certficateData;
+    protected $certificateNumber;
+    protected $certificateData;
     /**
      * Create an instance from globals
      *
@@ -261,8 +261,8 @@ class Request extends ServerRequest
         array $queryParams = [],
         $parsedBody = null,
         $protocol = '1.1',
-        string $certficateNumber = null,
-        string $certficateData = null
+        string $certificateNumber = null,
+        string $certificateData = null
     ) {
         $uri = new Uri((string)$uri);
         parent::__construct(
@@ -277,8 +277,8 @@ class Request extends ServerRequest
             $parsedBody,
             $protocol
         );
-        $this->certificateNumber = $certficateNumber ? strtoupper(ltrim(trim($certficateNumber), '0')) : null;
-        $this->certficateData = $certficateData;
+        $this->certificateNumber = $certificateNumber ? strtoupper(ltrim(trim($certificateNumber), '0')) : null;
+        $this->certificateData = $certificateData;
     }
     protected function cleanValue($value, $mode = null)
     {
@@ -538,21 +538,21 @@ class Request extends ServerRequest
     }
     public function hasCertificate()
     {
-        return $this->certficateNumber !== null;
+        return $this->certificateNumber !== null;
     }
     public function getCertificateNumber()
     {
-        return $this->certficateNumber;
+        return $this->certificateNumber;
     }
     public function getCertificate()
     {
-        return $this->certficateData;
+        return $this->certificateData;
     }
     public function withCertificate(string $number, string $data = null)
     {
         $ret = clone $this;
-        $ret->certficateNumber = strtoupper(ltrim(trim($number), '0'));
-        $ret->certficateData = $data;
+        $ret->certificateNumber = strtoupper(ltrim(trim($number), '0'));
+        $ret->certificateData = $data;
         return $ret;
     }
 }
