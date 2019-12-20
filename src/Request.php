@@ -10,6 +10,8 @@ use Zend\Diactoros\ServerRequestFactory;
 
 class Request extends ServerRequest
 {
+    protected $certficateNumber;
+    protected $certficateData;
     /**
      * Create an instance from globals
      *
@@ -79,7 +81,9 @@ class Request extends ServerRequest
             $cookies ?: $_COOKIE,
             $query ?: static::fixedQueryParams($uri->getQuery()),
             $body ?: (count($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true)),
-            \Zend\Diactoros\marshalProtocolVersionFromSapi($server)
+            \Zend\Diactoros\marshalProtocolVersionFromSapi($server),
+            $server['SSL_CLIENT_M_SERIAL'] ?? null,
+            $server['SSL_CLIENT_CERT'] ?? null
         );
     }
     public static function fromString(string $str) : Request
@@ -256,7 +260,9 @@ class Request extends ServerRequest
         array $cookies = [],
         array $queryParams = [],
         $parsedBody = null,
-        $protocol = '1.1'
+        $protocol = '1.1',
+        string $certficateNumber = null,
+        string $certficateData = null
     ) {
         $uri = new Uri((string)$uri);
         parent::__construct(
@@ -271,6 +277,8 @@ class Request extends ServerRequest
             $parsedBody,
             $protocol
         );
+        $this->certificateNumber = $certficateNumber ? strtoupper(ltrim(trim($certficateNumber), '0')) : null;
+        $this->certficateData = $certficateData;
     }
     protected function cleanValue($value, $mode = null)
     {
@@ -527,5 +535,24 @@ class Request extends ServerRequest
             }
         }
         return $default;
+    }
+    public function hasCertificate()
+    {
+        return $this->certficateNumber !== null;
+    }
+    public function getCertificateNumber()
+    {
+        return $this->certficateNumber;
+    }
+    public function getCertificate()
+    {
+        return $this->certficateData;
+    }
+    public function withCertificate(string $number, string $data = null)
+    {
+        $ret = clone $this;
+        $ret->certficateNumber = strtoupper(ltrim(trim($number), '0'));
+        $ret->certficateData = $data;
+        return $ret;
     }
 }
