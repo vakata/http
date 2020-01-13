@@ -7,7 +7,7 @@ Psr\Http\Message\RequestInterface, Psr\Http\Message\MessageInterface, Psr\Http\M
 
 ## Extend:
 
-Zend\Diactoros\ServerRequest
+Laminas\Diactoros\ServerRequest
 
 ## Methods
 
@@ -17,6 +17,8 @@ Zend\Diactoros\ServerRequest
 |[fromGlobals](#requestfromglobals)|Create an instance from globals|
 |[fromString](#requestfromstring)||
 |[getAuthorization](#requestgetauthorization)|Get any authorization details supplied with the request.|
+|[getCertificate](#requestgetcertificate)||
+|[getCertificateNumber](#requestgetcertificatenumber)||
 |[getCookie](#requestgetcookie)|Gets a value from a cookie that came with the request|
 |[getPost](#requestgetpost)|Get a param from the request body (if it is in JSON format it will be parsed out as well)|
 |[getPreferredResponseFormat](#requestgetpreferredresponseformat)|Get the preffered response language (parses the Accept-Language header if present).|
@@ -24,15 +26,17 @@ Zend\Diactoros\ServerRequest
 |[getPreferredResponseLanguage](#requestgetpreferredresponselanguage)|Get the preffered response language (parses the Accept-Language header if present).|
 |[getPreferredResponseLanguages](#requestgetpreferredresponselanguages)|Get the prefered response languages (parses the Accept-Language header if present).|
 |[getQuery](#requestgetquery)|Get a GET param from the request URL|
-|[getUrl](#requestgeturl)||
+|[getUrl](#requestgeturl)|Get the Uri object|
+|[hasCertificate](#requesthascertificate)||
 |[isAjax](#requestisajax)|Determine if this is an AJAX request|
 |[isCors](#requestiscors)|Determine if this is an CORS request|
+|[withCertificate](#requestwithcertificate)||
 
 ## Inherited methods
 
 | Name | Description |
 |------|-------------|
-|__construct|-|
+| [__construct](https://secure.php.net/manual/en/laminas\diactoros\serverrequest.__construct.php) | - |
 |getAttribute|{@inheritdoc}|
 |getAttributes|{@inheritdoc}|
 |getBody|Gets the body of the message.|
@@ -40,7 +44,7 @@ Zend\Diactoros\ServerRequest
 |getHeader|Retrieves a message header value by the given case-insensitive name.|
 |getHeaderLine|Retrieves a comma-separated string of the values for a single header.|
 |getHeaders|Retrieves all message headers.|
-|getMethod|Proxy to receive the request method.|
+|getMethod|Retrieves the HTTP method of the request.|
 |getParsedBody|{@inheritdoc}|
 |getProtocolVersion|Retrieves the HTTP protocol version as a string.|
 |getQueryParams|{@inheritdoc}|
@@ -56,7 +60,7 @@ given value.|
 |withCookieParams|{@inheritdoc}|
 |withHeader|Return an instance with the provided header, replacing any existing
 values of any headers with the same case-insensitive name.|
-|withMethod|Set the request method.|
+|withMethod|Return an instance with the provided HTTP method.|
 |withParsedBody|{@inheritdoc}|
 |withProtocolVersion|Return an instance with the specified HTTP protocol version.|
 |withQueryParams|{@inheritdoc}|
@@ -73,7 +77,7 @@ values of any headers with the same case-insensitive name.|
 **Description**
 
 ```php
-public static fixedQueryParams (void)
+ fixedQueryParams (void)
 ```
 
  
@@ -86,7 +90,10 @@ public static fixedQueryParams (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Request::fromGlobals  
@@ -116,13 +123,15 @@ Create an instance from globals
 
 
 
+<hr />
+
 
 ### Request::fromString  
 
 **Description**
 
 ```php
-public static fromString (void)
+ fromString (void)
 ```
 
  
@@ -135,7 +144,10 @@ public static fromString (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Request::getAuthorization  
@@ -158,9 +170,58 @@ Get any authorization details supplied with the request.
 
 `array|null`
 
-> array of extracted values or null (possible keys are username, password and token)  
+> array of extracted values or null (possible keys are username, password and token)
 
 
+<hr />
+
+
+### Request::getCertificate  
+
+**Description**
+
+```php
+ getCertificate (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
+
+
+### Request::getCertificateNumber  
+
+**Description**
+
+```php
+ getCertificateNumber (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
 
 
 ### Request::getCookie  
@@ -186,11 +247,12 @@ Gets a value from a cookie that came with the request
 
 **Return Values**
 
-`string|array`
+`mixed`
 
-> the value (or values)  
+> the value (or values)
 
 
+<hr />
 
 
 ### Request::getPost  
@@ -216,11 +278,12 @@ Get a param from the request body (if it is in JSON format it will be parsed out
 
 **Return Values**
 
-`string|array`
+`mixed`
 
-> the value (or values if no key was specified)  
+> the value (or values if no key was specified)
 
 
+<hr />
 
 
 ### Request::getPreferredResponseFormat  
@@ -246,9 +309,10 @@ Get the preffered response language (parses the Accept-Language header if presen
 
 `string`
 
-> the prefered language code  
+> the prefered language code
 
 
+<hr />
 
 
 ### Request::getPreferredResponseFormats  
@@ -272,9 +336,10 @@ Get the prefered response formats.
 
 `string[]`
 
-> the desired response formats  
+> the desired response formats
 
 
+<hr />
 
 
 ### Request::getPreferredResponseLanguage  
@@ -300,9 +365,10 @@ Get the preffered response language (parses the Accept-Language header if presen
 
 `string`
 
-> the prefered language code  
+> the prefered language code
 
 
+<hr />
 
 
 ### Request::getPreferredResponseLanguages  
@@ -326,9 +392,10 @@ Get the prefered response languages (parses the Accept-Language header if presen
 
 `array`
 
-> array of ordered lowercase language codes  
+> array of ordered lowercase language codes
 
 
+<hr />
 
 
 ### Request::getQuery  
@@ -354,11 +421,12 @@ Get a GET param from the request URL
 
 **Return Values**
 
-`string|array`
+`mixed`
 
-> the value (or values)  
+> the value (or values)
 
 
+<hr />
 
 
 ### Request::getUrl  
@@ -367,6 +435,32 @@ Get a GET param from the request URL
 
 ```php
 public getUrl (void)
+```
+
+Get the Uri object 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`\Uri`
+
+
+
+
+<hr />
+
+
+### Request::hasCertificate  
+
+**Description**
+
+```php
+ hasCertificate (void)
 ```
 
  
@@ -379,7 +473,10 @@ public getUrl (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Request::isAjax  
@@ -400,11 +497,12 @@ Determine if this is an AJAX request
 
 **Return Values**
 
-`boolean`
+`bool`
 
-> is the request AJAX  
+> is the request AJAX
 
 
+<hr />
 
 
 ### Request::isCors  
@@ -425,9 +523,34 @@ Determine if this is an CORS request
 
 **Return Values**
 
-`boolean`
+`bool`
 
-> is the request CORS  
+> is the request CORS
 
 
+<hr />
+
+
+### Request::withCertificate  
+
+**Description**
+
+```php
+ withCertificate (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
 

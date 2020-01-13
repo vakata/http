@@ -7,7 +7,7 @@ Psr\Http\Message\UriInterface
 
 ## Extend:
 
-Zend\Diactoros\Uri
+Laminas\Diactoros\Uri
 
 ## Methods
 
@@ -20,13 +20,14 @@ Zend\Diactoros\Uri
 |[getSegment](#urigetsegment)||
 |[linkTo](#urilinkto)||
 |[self](#uriself)||
+|[setBasePath](#urisetbasepath)||
 
 ## Inherited methods
 
 | Name | Description |
 |------|-------------|
 |__clone|Operations to perform on clone.|
-|__construct|-|
+| [__construct](https://secure.php.net/manual/en/laminas\diactoros\uri.__construct.php) | - |
 |__toString|{@inheritdoc}|
 |getAuthority|{@inheritdoc}|
 |getFragment|{@inheritdoc}|
@@ -51,7 +52,7 @@ Zend\Diactoros\Uri
 **Description**
 
 ```php
-public __invoke (void)
+ __invoke (void)
 ```
 
  
@@ -64,7 +65,10 @@ public __invoke (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Uri::get  
@@ -72,7 +76,7 @@ public __invoke (void)
 **Description**
 
 ```php
-public get (void)
+ get (void)
 ```
 
  
@@ -85,7 +89,10 @@ public get (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Uri::getBasePath  
@@ -93,7 +100,7 @@ public get (void)
 **Description**
 
 ```php
-public getBasePath (void)
+ getBasePath (void)
 ```
 
  
@@ -106,7 +113,10 @@ public getBasePath (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Uri::getRealPath  
@@ -114,7 +124,7 @@ public getBasePath (void)
 **Description**
 
 ```php
-public getRealPath (void)
+ getRealPath (void)
 ```
 
  
@@ -127,7 +137,10 @@ public getRealPath (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Uri::getSegment  
@@ -135,7 +148,7 @@ public getRealPath (void)
 **Description**
 
 ```php
-public getSegment (void)
+ getSegment (void)
 ```
 
  
@@ -148,7 +161,10 @@ public getSegment (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Uri::linkTo  
@@ -156,7 +172,7 @@ public getSegment (void)
 **Description**
 
 ```php
-public linkTo (void)
+ linkTo (void)
 ```
 
  
@@ -169,7 +185,10 @@ public linkTo (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Uri::self  
@@ -177,7 +196,7 @@ public linkTo (void)
 **Description**
 
 ```php
-public self (void)
+ self (void)
 ```
 
  
@@ -190,5 +209,32 @@ public self (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
+
+
+### Uri::setBasePath  
+
+**Description**
+
+```php
+ setBasePath (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
 

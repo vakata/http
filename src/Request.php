@@ -2,11 +2,11 @@
 
 namespace vakata\http;
 
-use Zend\Diactoros\Uri as ZendUri;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\UploadedFile;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\Uri as LaminasUri;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\UploadedFile;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequestFactory;
 
 class Request extends ServerRequest
 {
@@ -29,8 +29,8 @@ class Request extends ServerRequest
         array $cookies = null,
         array $files = null
     ) {
-        $server  = \Zend\Diactoros\normalizeServer($server ?: $_SERVER);
-        $files   = \Zend\Diactoros\normalizeUploadedFiles($files ?: $_FILES);
+        $server  = \Laminas\Diactoros\normalizeServer($server ?: $_SERVER);
+        $files   = \Laminas\Diactoros\normalizeUploadedFiles($files ?: $_FILES);
         $headers = [];
         foreach ($server as $key => $value) {
             if (strpos($key, 'REDIRECT_') === 0) {
@@ -51,8 +51,8 @@ class Request extends ServerRequest
             }
         }
 
-        $method  = \Zend\Diactoros\marshalMethodFromSapi($server);
-        $uri     = \Zend\Diactoros\marshalUriFromSapi($server, $headers);
+        $method  = \Laminas\Diactoros\marshalMethodFromSapi($server);
+        $uri     = \Laminas\Diactoros\marshalUriFromSapi($server, $headers);
 
         if (null === $cookies && array_key_exists('cookie', $headers)) {
             $cookies = self::parseCookieHeader($headers['cookie']);
@@ -81,7 +81,7 @@ class Request extends ServerRequest
             $cookies ?: $_COOKIE,
             $query ?: static::fixedQueryParams($uri->getQuery()),
             $body ?: (count($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true)),
-            \Zend\Diactoros\marshalProtocolVersionFromSapi($server),
+            \Laminas\Diactoros\marshalProtocolVersionFromSapi($server),
             $server['SSL_CLIENT_M_SERIAL'] ?? null,
             $server['SSL_CLIENT_CERT'] ?? null
         );
@@ -185,10 +185,10 @@ class Request extends ServerRequest
         }
         $temp = (new Stream('php://temp', 'wb+'));
         $temp->write($body);
-        $uri = new ZendUri($uri);
+        $uri = new LaminasUri($uri);
         return new static(
             [],
-            \Zend\Diactoros\normalizeUploadedFiles($files),
+            \Laminas\Diactoros\normalizeUploadedFiles($files),
             $uri,
             $method,
             $temp,

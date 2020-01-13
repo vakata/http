@@ -44,7 +44,7 @@ class Emitter
      *
      * @param Response $response
      *
-     * @see \Zend\Diactoros\Response\SapiEmitterTrait::emitHeaders()
+     * @see \Laminas\Diactoros\Response\SapiEmitterTrait::emitHeaders()
      */
     private function emitStatusLine(Response $response)
     {

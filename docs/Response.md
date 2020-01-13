@@ -7,7 +7,7 @@ Psr\Http\Message\MessageInterface, Psr\Http\Message\ResponseInterface
 
 ## Extend:
 
-Zend\Diactoros\Response
+Laminas\Diactoros\Response
 
 ## Methods
 
@@ -15,17 +15,20 @@ Zend\Diactoros\Response
 |------|-------------|
 |[cacheUntil](#responsecacheuntil)|Make the response cacheable.|
 |[expireCookie](#responseexpirecookie)|Expires an existing cookie|
+|[getCallback](#responsegetcallback)||
 |[hasCache](#responsehascache)||
+|[hasCallback](#responsehascallback)||
 |[noCache](#responsenocache)|Prevent caching|
 |[setBody](#responsesetbody)||
 |[setContentTypeByExtension](#responsesetcontenttypebyextension)||
+|[withCallback](#responsewithcallback)||
 |[withCookie](#responsewithcookie)|Set a cookie|
 
 ## Inherited methods
 
 | Name | Description |
 |------|-------------|
-|__construct|-|
+| [__construct](https://secure.php.net/manual/en/laminas\diactoros\response.__construct.php) | - |
 |getBody|Gets the body of the message.|
 |getHeader|Retrieves a message header value by the given case-insensitive name.|
 |getHeaderLine|Retrieves a comma-separated string of the values for a single header.|
@@ -69,6 +72,8 @@ Make the response cacheable.
 
 
 
+<hr />
+
 
 ### Response::expireCookie  
 
@@ -96,13 +101,15 @@ Expires an existing cookie
 
 
 
+<hr />
 
-### Response::hasCache  
+
+### Response::getCallback  
 
 **Description**
 
 ```php
-public hasCache (void)
+ getCallback (void)
 ```
 
  
@@ -115,7 +122,58 @@ public hasCache (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
+
+
+### Response::hasCache  
+
+**Description**
+
+```php
+ hasCache (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
+
+
+### Response::hasCallback  
+
+**Description**
+
+```php
+ hasCallback (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
 
 
 ### Response::noCache  
@@ -141,13 +199,15 @@ Prevent caching
 
 
 
+<hr />
+
 
 ### Response::setBody  
 
 **Description**
 
 ```php
-public setBody (void)
+ setBody (void)
 ```
 
  
@@ -160,7 +220,10 @@ public setBody (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
 
 
 ### Response::setContentTypeByExtension  
@@ -168,7 +231,7 @@ public setBody (void)
 **Description**
 
 ```php
-public setContentTypeByExtension (void)
+ setContentTypeByExtension (void)
 ```
 
  
@@ -181,7 +244,34 @@ public setContentTypeByExtension (void)
 
 **Return Values**
 
+`void`
 
+
+<hr />
+
+
+### Response::withCallback  
+
+**Description**
+
+```php
+ withCallback (void)
+```
+
+ 
+
+ 
+
+**Parameters**
+
+`This function has no parameters.`
+
+**Return Values**
+
+`void`
+
+
+<hr />
 
 
 ### Response::withCookie  
@@ -211,4 +301,6 @@ Set a cookie
 
 
 
+
+<hr />
 

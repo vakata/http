@@ -2,9 +2,9 @@
 
 namespace vakata\http;
 
-use Zend\Diactoros\Uri as ZendUri;
+use Laminas\Diactoros\Uri as LaminasUri;
 
-class Uri extends ZendUri
+class Uri extends LaminasUri
 {
     protected $basePath;
     protected $realPath;
@@ -62,7 +62,7 @@ class Uri extends ZendUri
         }
         $data = parse_url($path . (count($params) ? '?' . http_build_query($params) : ''));
         if (!isset($data['host']) && !isset($data['path'])) {
-            throw new Exception('Invalid destination');
+            throw new \Exception('Invalid destination');
         }
         if (!isset($data['path']) || !strlen($data['path'])) {
             $data['path'] = isset($data['host']) ? '/' : $this->getBasePath();

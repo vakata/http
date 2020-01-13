@@ -2,8 +2,8 @@
 
 namespace vakata\http;
 
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Response as PSRResponse;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Response as PSRResponse;
 
 class Response extends PSRResponse
 {
