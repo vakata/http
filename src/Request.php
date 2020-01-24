@@ -221,6 +221,9 @@ class Request extends ServerRequest
                 $tmp = &$tmp[$k];
             }
             if ($name[count($name) - 1] == '') {
+                if (!is_array($tmp)) {
+                    $tmp = [];
+                }
                 $tmp[] = $value;
             } else {
                 $tmp = $value;
