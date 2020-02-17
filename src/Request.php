@@ -215,6 +215,9 @@ class Request extends ServerRequest
                 if ($k === "") {
                     continue;
                 }
+                if (!is_array($tmp)) {
+                    $tmp = [];
+                }
                 if (!isset($tmp[$k])) {
                     $tmp[$k] = [];
                 }
