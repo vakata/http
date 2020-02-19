@@ -78,8 +78,8 @@ class Uri extends LaminasUri
         $path = $data['path'] . (isset($data['query']) ? '?' . $data['query'] : '');
         $frag = isset($data['fragment']) ? '#' . $data['fragment'] : '';
 
-        if ($absolute || (isset($data['scheme']) && $data['scheme'] !== $curr['scheme'])) {
-            return $data['scheme'] . '://' . $host . $path . $frag;
+        if ($absolute || (isset($data['scheme']) && $data['scheme'] !== ($curr['scheme'] ?? null))) {
+            return (isset($data['scheme']) ? $data['scheme'] . ':' : '') . '//' . $host . $path . $frag;
         }
         if ((isset($data['host']) && $data['host'] !== $curr['host']) ||
             (isset($data['port']) && $data['port'] !== $curr['port'])
