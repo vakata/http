@@ -60,14 +60,13 @@ class Request extends ServerRequest
         
 
         if ($body === null) {
-            $body = [];
-            if (isset($headers['content-type']) && strpos($headers['content-type'], 'json') !== false) {
-                $body = json_decode($body, true);
-                if ($body === null) {
-                    $body = [];
+            $temp = file_get_contents('php://input');
+            if ($temp !== false && strlen($temp)) {
+                if (isset($headers['content-type']) && strpos($headers['content-type'], 'json') !== false) {
+                    $body = json_decode($temp, true);
+                } else {
+                    $body = static::fixedQueryParams($temp);
                 }
-            } else {
-                $body = static::fixedQueryParams(file_get_contents('php://input'));
             }
         }
 
@@ -80,7 +79,7 @@ class Request extends ServerRequest
             $headers,
             $cookies ?: $_COOKIE,
             $query ?: static::fixedQueryParams($uri->getQuery()),
-            $body ?: (count($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true)),
+            $body ?: (count($_POST) ? $_POST : null),
             \Laminas\Diactoros\marshalProtocolVersionFromSapi($server),
             $server['SSL_CLIENT_M_SERIAL'] ?? null,
             $server['SSL_CLIENT_CERT'] ?? null
