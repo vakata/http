@@ -3,6 +3,7 @@
 namespace vakata\http;
 
 use RuntimeException;
+use Laminas\Diactoros\Response as PSRResponse;
 
 use function ob_get_length;
 use function ob_get_level;
@@ -42,11 +43,11 @@ class Emitter
      * `emitHeaders()` in order to prevent PHP from changing the status code of
      * the emitted response.
      *
-     * @param Response $response
+     * @param PSRResponse $response
      *
      * @see \Laminas\Diactoros\Response\SapiEmitterTrait::emitHeaders()
      */
-    private function emitStatusLine(Response $response)
+    private function emitStatusLine(PSRResponse $response)
     {
         $reasonPhrase = $response->getReasonPhrase();
         $statusCode   = $response->getStatusCode();
@@ -67,9 +68,9 @@ class Emitter
      * in such a way as to create aggregate headers (instead of replace
      * the previous).
      *
-     * @param Response $response
+     * @param PSRResponse $response
      */
-    private function emitHeaders(Response $response)
+    private function emitHeaders(PSRResponse $response)
     {
         $statusCode = $response->getStatusCode();
 
@@ -106,16 +107,16 @@ class Emitter
      * Emits the status line and headers via the header() function, and the
      * body content via the output buffer.
      *
-     * @param Response $response
+     * @param PSRResponse $response
      */
-    public function emit(Response $response, $maxBufferLength = 8192)
+    public function emit(PSRResponse $response, $maxBufferLength = 8192)
     {
         $this->assertNoPreviousOutput();
 
         $this->emitHeaders($response);
         $this->emitStatusLine($response);
         
-        if ($response->hasCallback()) {
+        if (($response instanceof Response) && $response->hasCallback()) {
             call_user_func($response->getCallback());
         } elseif ($response->hasHeader('Accept-Ranges')) {
             $range = $this->parseContentRange($response->getHeaderLine('Content-Range'));
@@ -163,10 +164,10 @@ class Emitter
      * Emit a range of the message body.
      *
      * @param array $range
-     * @param ResponseInterface $response
+     * @param PSRResponse $response
      * @param int $maxBufferLength
      */
-    private function emitBodyRange(array $range, Response $response, $maxBufferLength)
+    private function emitBodyRange(array $range, PSRResponse $response, $maxBufferLength)
     {
         list($unit, $first, $last, $length) = $range;
 
