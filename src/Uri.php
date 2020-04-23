@@ -75,6 +75,7 @@ class Uri extends LaminasUri
         unset($curr['fragment']);
         $data = array_merge($curr, $data);
         $host = $data['host'] . (isset($data['port']) ? ':' . $data['port'] : '');
+        $data['path'] = implode('/', array_map('urlencode', explode('/', $data['path'])));
         $path = $data['path'] . (isset($data['query']) ? '?' . $data['query'] : '');
         $frag = isset($data['fragment']) ? '#' . $data['fragment'] : '';
 
