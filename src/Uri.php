@@ -28,7 +28,7 @@ class Uri extends LaminasUri
             $this->realPath = substr($this->realPath, strlen($this->basePath)) ?: '';
         }
         $this->realPath = rtrim($this->realPath, '/') . ($hasTrailingSlash ? '/' : '');
-        $this->segments = array_map('urldecode', array_filter(
+        $this->segments = array_map('rawurldecode', array_filter(
             explode('/', trim($this->realPath, '/')),
             function ($v) {
                 return $v !== '';
@@ -70,12 +70,16 @@ class Uri extends LaminasUri
         if (substr($data['path'], 0, 1) !== '/') {
             $data['path'] = $this->basePath . $data['path'];
         }
+        $data['path'] = implode('/', array_map(
+            'rawurldecode',
+            explode('/', $data['path'])
+        ));
         $curr = parse_url((string)$this);
         unset($curr['query']);
         unset($curr['fragment']);
         $data = array_merge($curr, $data);
         $host = $data['host'] . (isset($data['port']) ? ':' . $data['port'] : '');
-        $data['path'] = implode('/', array_map('urlencode', explode('/', $data['path'])));
+        $data['path'] = implode('/', array_map('rawurlencode', explode('/', $data['path'])));
         $path = $data['path'] . (isset($data['query']) ? '?' . $data['query'] : '');
         $frag = isset($data['fragment']) ? '#' . $data['fragment'] : '';
 

@@ -339,6 +339,12 @@ class Request extends ServerRequest
         if ($key === null) {
             return $this->cleanValue($collection, $mode);
         }
+        if (!isset($collection[$key]) && isset($collection[rawurldecode($key)])) {
+            $key = rawurldecode($key);
+        }
+        if (!isset($collection[$key]) && isset($collection[urldecode($key)])) {
+            $key = urldecode($key);
+        }
         return isset($collection[$key]) ? $this->cleanValue($collection[$key], $mode) : $default;
     }
     /**
