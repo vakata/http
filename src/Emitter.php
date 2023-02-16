@@ -22,7 +22,7 @@ class Emitter
      * @throws RuntimeException if headers have already been sent.
      * @throws RuntimeException if output is present in the output buffer.
      */
-    private function assertNoPreviousOutput()
+    private function assertNoPreviousOutput(): void
     {
         if (headers_sent()) {
             throw new RuntimeException('Unable to emit response; headers already sent');
@@ -47,7 +47,7 @@ class Emitter
      *
      * @see \Laminas\Diactoros\Response\SapiEmitterTrait::emitHeaders()
      */
-    private function emitStatusLine(PSRResponse $response)
+    private function emitStatusLine(PSRResponse $response): void
     {
         $reasonPhrase = $response->getReasonPhrase();
         $statusCode   = $response->getStatusCode();
@@ -70,7 +70,7 @@ class Emitter
      *
      * @param PSRResponse $response
      */
-    private function emitHeaders(PSRResponse $response)
+    private function emitHeaders(PSRResponse $response): void
     {
         $statusCode = $response->getStatusCode();
 
@@ -94,7 +94,7 @@ class Emitter
      * @param string $header
      * @return string
      */
-    private function filterHeader($header)
+    private function filterHeader(string $header): string
     {
         $filtered = str_replace('-', ' ', $header);
         $filtered = ucwords($filtered);
@@ -109,14 +109,14 @@ class Emitter
      *
      * @param PSRResponse $response
      */
-    public function emit(PSRResponse $response, $maxBufferLength = 8192)
+    public function emit(PSRResponse $response, int $maxBufferLength = 8192): void
     {
         $this->assertNoPreviousOutput();
 
         $this->emitHeaders($response);
         $this->emitStatusLine($response);
         
-        if (($response instanceof Response) && $response->hasCallback()) {
+        if (($response instanceof Response) && $response->hasCallback() && $response->getCallback()) {
             call_user_func($response->getCallback());
         } elseif ($response->hasHeader('Accept-Ranges')) {
             $range = $this->parseContentRange($response->getHeaderLine('Content-Range'));
@@ -148,7 +148,7 @@ class Emitter
      * @return false|array [unit, first, last, length]; returns false if no
      *     content range or an invalid content range is provided
      */
-    private function parseContentRange($header)
+    private function parseContentRange(string $header): mixed
     {
         if (preg_match('/(?P<unit>[\w]+)\s+(?P<first>\d+)-(?P<last>\d+)\/(?P<length>\d+|\*)/', $header, $matches)) {
             return [
@@ -167,7 +167,7 @@ class Emitter
      * @param PSRResponse $response
      * @param int $maxBufferLength
      */
-    private function emitBodyRange(array $range, PSRResponse $response, $maxBufferLength)
+    private function emitBodyRange(array $range, PSRResponse $response, int $maxBufferLength): void
     {
         list($unit, $first, $last, $length) = $range;
 
