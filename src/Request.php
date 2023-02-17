@@ -572,9 +572,8 @@ class Request extends ServerRequest
     }
     public function withCertificate(string $number, string $data = null): static
     {
-        $ret = clone $this;
-        $ret->certificateNumber = strtoupper(ltrim(trim($number), '0'));
-        $ret->certificateData = $data;
-        return $ret;
+        $this->certificateNumber = strtoupper(ltrim(trim($number), '0'));
+        $this->certificateData = $data;
+        return $this;
     }
 }
