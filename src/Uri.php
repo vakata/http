@@ -47,7 +47,7 @@ class Uri extends LaminasUri
     {
         return $this->realPath;
     }
-    public function getSegment(mixed $index, mixed $default = null): ?string
+    public function getSegment(mixed $index, string $default = ''): string
     {
         if (is_numeric($index) && (int)$index < 0) {
             $index = count($this->segments) - 2 + $index; // -2 to avoid "base" and "path"
