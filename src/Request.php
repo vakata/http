@@ -249,7 +249,10 @@ class Request extends ServerRequest
 
         if (is_array($matches)) {
             foreach ($matches as $match) {
-                $cookies[$match['name']] = urldecode($match['value']);
+                // RFC for cookies says we SHOULD prefer the first cookie
+                if (!isset($cookies[$match['name']])) {
+                    $cookies[$match['name']] = urldecode($match['value']);
+                }
             }
         }
 
