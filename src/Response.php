@@ -2,14 +2,15 @@
 
 namespace vakata\http;
 
+use Closure;
 use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\Response as PSRResponse;
 
 class Response extends PSRResponse
 {
-    protected $callback = null;
+    protected ?Closure $callback = null;
 
-    public function __construct($status = 200, string $body = null, array $headers = [])
+    public function __construct(int $status = 200, string $body = null, array $headers = [])
     {
         if ($body !== null) {
             $temp = (new Stream('php://temp', 'wb+'));
@@ -19,7 +20,7 @@ class Response extends PSRResponse
         }
         parent::__construct($temp, $status, $headers);
     }
-    public function hasCache()
+    public function hasCache(): bool
     {
         return $this->hasHeader('Cache-Control') ||
             $this->hasHeader('Expires') ||
@@ -29,9 +30,9 @@ class Response extends PSRResponse
     /**
      * Make the response cacheable.
      * @param  int|string     $expires when should the request expire - either a timestamp or strtotime expression
-     * @return self
+     * @return static
      */
-    public function cacheUntil($expires)
+    public function cacheUntil(int|string $expires): static
     {
         if (!is_int($expires)) {
             $expires = strtotime($expires);
@@ -39,20 +40,20 @@ class Response extends PSRResponse
         return $this
             ->withHeader('Pragma', 'public')
             ->withHeader('Cache-Control', 'maxage='.($expires - time()))
-            ->withHeader('Expires', gmdate('D, d M Y H:i:s', $expires).' GMT');
+            ->withHeader('Expires', gmdate('D, d M Y H:i:s', $expires ?: null).' GMT');
     }
     /**
      * Prevent caching
      *
-     * @return self
+     * @return static
      */
-    public function noCache()
+    public function noCache(): static
     {
         return $this
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
             ->withHeader('Expires', gmdate('D, d M Y H:i:s', 0).' GMT');
     }
-    public function setBody(string $body)
+    public function setBody(string $body): static
     {
         $temp = (new Stream('php://temp', 'wb+'));
         $temp->write($body);
@@ -63,9 +64,9 @@ class Response extends PSRResponse
      * @param  string    $name  the cookie name
      * @param  string    $value the cookie value
      * @param  string    $extra optional extra params for the cookie (semicolon delimited)
-     * @return  self
+     * @return  static
      */
-    public function withCookie($name, $value, $extra = '')
+    public function withCookie(string $name, string $value, string $extra = ''): static
     {
         return $this->withAddedHeader('Set-Cookie', $name . '=' . urlencode($value) . '; ' . $extra);
     }
@@ -80,7 +81,7 @@ class Response extends PSRResponse
         $extra = implode('; ', array_filter([ $extra, 'Expires=' . date('r', 0) ]));
         return $this->withCookie($name, 'deleted', $extra);
     }
-    public function setContentTypeByExtension(string $extension)
+    public function setContentTypeByExtension(string $extension): static
     {
         switch (strtolower($extension)) {
             case "txt":
@@ -149,20 +150,20 @@ class Response extends PSRResponse
         return $this->withHeader('Content-Type', $type);
     }
 
-    public function withCallback(callable $callback = null)
+    public function withCallback(callable $callback = null): static
     {
         return $this->setBody('')->setCallback($callback);
     }
-    protected function setCallback(callable $callback = null)
+    protected function setCallback(callable $callback = null): static
     {
-        $this->callback = $callback;
+        $this->callback = $callback ? Closure::fromCallable($callback) : null;
         return $this;
     }
-    public function hasCallback()
+    public function hasCallback(): bool
     {
         return $this->callback !== null;
     }
-    public function getCallback()
+    public function getCallback(): ?callable
     {
         return $this->callback;
     }

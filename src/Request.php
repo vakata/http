@@ -7,11 +7,14 @@ use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\UploadedFile;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\ServerRequestFactory;
+use Psr\Http\Message\UriInterface;
+use RuntimeException;
 
 class Request extends ServerRequest
 {
-    protected $certificateNumber;
-    protected $certificateData;
+    protected ?string $certificateNumber = null;
+    protected ?string $certificateData = null;
+    protected Uri $url;
     /**
      * Create an instance from globals
      *
@@ -28,7 +31,8 @@ class Request extends ServerRequest
         array $body = null,
         array $cookies = null,
         array $files = null
-    ) {
+    ): Request
+    {
         $server  = \Laminas\Diactoros\normalizeServer($server ?: $_SERVER);
         $files   = \Laminas\Diactoros\normalizeUploadedFiles($files ?: $_FILES);
         $headers = [];
@@ -52,7 +56,7 @@ class Request extends ServerRequest
         }
 
         $method  = \Laminas\Diactoros\marshalMethodFromSapi($server);
-        $uri     = \Laminas\Diactoros\marshalUriFromSapi($server, $headers);
+        $uri     = \Laminas\Diactoros\UriFactory::createFromSapi($server, $headers);
 
         if (null === $cookies && array_key_exists('cookie', $headers)) {
             $cookies = self::parseCookieHeader($headers['cookie']);
@@ -70,7 +74,7 @@ class Request extends ServerRequest
             }
         }
 
-        return new static(
+        return new self(
             $server,
             $files,
             $uri,
@@ -85,7 +89,7 @@ class Request extends ServerRequest
             $server['SSL_CLIENT_CERT'] ?? null
         );
     }
-    public static function fromString(string $str) : Request
+    public static function fromString(string $str): Request
     {
         $method = 'GET';
         $version = '1.1';
@@ -137,7 +141,7 @@ class Request extends ServerRequest
                 $fres = [];
                 foreach ($parts as $k => $item) {
                     list($head, $pbody) = explode($break . $break, $item, 2);
-                    $head = explode($break, preg_replace("(" . $break . "\s+)", " ", $head));
+                    $head = explode($break, preg_replace("(" . $break . "\s+)", " ", $head) ?? '');
                     foreach ($head as $h) {
                         if (strpos(strtolower($h), 'content-disposition') === 0) {
                             $cd = explode(';', $h);
@@ -154,6 +158,9 @@ class Request extends ServerRequest
                             if ($file) {
                                 // create resource manually
                                 $fres[$k] = fopen('php://temp', 'wb+');
+                                if ($fres[$k] === false) {
+                                    throw new RuntimeException();
+                                }
                                 fwrite($fres[$k], $pbody);
                                 rewind($fres[$k]);
                                 $files[$name] = new UploadedFile(
@@ -185,7 +192,7 @@ class Request extends ServerRequest
         $temp = (new Stream('php://temp', 'wb+'));
         $temp->write($body);
         $uri = new LaminasUri($uri);
-        return new static(
+        return new self(
             [],
             \Laminas\Diactoros\normalizeUploadedFiles($files),
             $uri,
@@ -198,7 +205,7 @@ class Request extends ServerRequest
             $version
         );
     }
-    public static function fixedQueryParams($query)
+    public static function fixedQueryParams(string $query): array
     {
         $data = [];
         $temp = strlen($query) ? explode('&', $query) : [];
@@ -233,7 +240,7 @@ class Request extends ServerRequest
         }
         return $data;
     }
-    private static function parseCookieHeader($cookieHeader)
+    private static function parseCookieHeader(string $cookieHeader): array
     {
         preg_match_all('(
             (?:^\\n?[ \t]*|;[ ])
@@ -272,11 +279,11 @@ class Request extends ServerRequest
         string $certificateNumber = null,
         string $certificateData = null
     ) {
-        $uri = new Uri((string)$uri);
+        $this->url = new Uri((string)$uri);
         parent::__construct(
             $serverParams,
             $uploadedFiles,
-            $uri,
+            $this->url,
             $method,
             $body,
             $headers,
@@ -288,7 +295,7 @@ class Request extends ServerRequest
         $this->certificateNumber = $certificateNumber ? strtoupper(ltrim(trim($certificateNumber), '0')) : null;
         $this->certificateData = $certificateData;
     }
-    protected function cleanValue($value, $mode = null)
+    protected function cleanValue(mixed $value, ?string $mode = null): mixed
     {
         if (is_array($value)) {
             $temp = [];
@@ -337,7 +344,7 @@ class Request extends ServerRequest
 
         return $value;
     }
-    protected function getValue(array $collection, $key, $default, $mode)
+    protected function getValue(array $collection, ?string $key, mixed $default, ?string $mode = null): mixed
     {
         if ($key === null) {
             return $this->cleanValue($collection, $mode);
@@ -357,7 +364,7 @@ class Request extends ServerRequest
      * @param  string    $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
      * @return mixed             the value (or values)
      */
-    public function getCookie($key = null, $default = null, $mode = null)
+    public function getCookie(?string $key = null, mixed $default = null, ?string $mode = null): mixed
     {
         return $this->getValue($this->getCookieParams(), $key, $default, $mode);
     }
@@ -368,7 +375,7 @@ class Request extends ServerRequest
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
      * @return mixed             the value (or values)
      */
-    public function getQuery($key = null, $default = null, $mode = null)
+    public function getQuery(?string $key = null, mixed $default = null, ?string $mode = null): mixed
     {
         return $this->getValue($this->getQueryParams(), $key, $default, $mode);
     }
@@ -379,7 +386,7 @@ class Request extends ServerRequest
      * @param  string   $mode    optional cleanup of the value, available modes are: int, float, nohtml, escape, string
      * @return mixed             the value (or values if no key was specified)
      */
-    public function getPost($key = null, $default = null, $mode = null)
+    public function getPost(?string $key = null, mixed $default = null, ?string $mode = null): mixed
     {
         $body = $this->getParsedBody();
         if (!is_array($body)) {
@@ -391,7 +398,7 @@ class Request extends ServerRequest
      * Get any authorization details supplied with the request.
      * @return array|null           array of extracted values or null (possible keys are username, password and token)
      */
-    public function getAuthorization()
+    public function getAuthorization(): ?array
     {
         if (!$this->hasHeader('Authorization')) {
             return null;
@@ -414,15 +421,15 @@ class Request extends ServerRequest
      * Get the Uri object
      * @return Uri
      */
-    public function getUrl()
+    public function getUrl(): Uri
     {
-        return $this->getUri();
+        return $this->url;
     }
     /**
      * Determine if this is an AJAX request
      * @return boolean is the request AJAX
      */
-    public function isAjax()
+    public function isAjax(): bool
     {
         return ($this->getHeaderLine('X-Requested-With') === 'XMLHttpRequest');
     }
@@ -430,7 +437,7 @@ class Request extends ServerRequest
      * Determine if this is an CORS request
      * @return boolean is the request CORS
      */
-    public function isCors()
+    public function isCors(): bool
     {
         if (!$this->hasHeader('Origin')) {
             return false;
@@ -449,17 +456,19 @@ class Request extends ServerRequest
      * @param  bool    $shortNames should values like "en-US", be truncated to "en", defaults to true
      * @return array   array of ordered lowercase language codes
      */
-    public function getPreferredResponseLanguages(bool $shortNames = true) : array
+    public function getPreferredResponseLanguages(bool $shortNames = true): array
     {
         $acpt = $this->getHeaderLine('Accept-Language') ?: '*';
         $acpt = explode(',', $acpt);
+        $rslt = [];
         foreach ($acpt as $k => $v) {
             $v = array_pad(explode(';', $v, 2), 2, 'q=1');
             $v[1] = (float) array_pad(explode('q=', $v[1], 2), 2, '1')[1];
             $v[0] = $shortNames ? explode('-', $v[0], 2)[0] : $v[0];
             $v[2] = $k;
-            $acpt[$k] = $v;
+            $rslt[$k] = $v;
         }
+        $acpt = $rslt; 
         usort($acpt, function ($a, $b) {
             if ($a[1] > $b[1]) {
                 return -1;
@@ -483,7 +492,7 @@ class Request extends ServerRequest
      * @param  array|null   $allowed an optional list of lowercase language codes to intersect with, defaults to null
      * @return string       the prefered language code
      */
-    public function getPreferredResponseLanguage(string $default = 'en', array $allowed = null) : string
+    public function getPreferredResponseLanguage(string $default = 'en', array $allowed = null): string
     {
         $acpt = $this->getPreferredResponseLanguages(true);
         foreach ($acpt as $lang) {
@@ -501,18 +510,20 @@ class Request extends ServerRequest
      * @param  string                    $default the default value to return if the Accept header is not present.
      * @return string[]                  the desired response formats
      */
-    public function getPreferredResponseFormats($default = 'text/html')
+    public function getPreferredResponseFormats(string $default = 'text/html'): array
     {
         // parse accept header (uses default instead of 406 header)
         $acpt = $this->getHeaderLine('Accept') ?: $default;
         $acpt = explode(',', $acpt);
+        $rslt = [];
         foreach ($acpt as $k => $v) {
             $v = array_pad(explode(';', $v, 2), 2, 'q=1');
             $v[1] = (float) array_pad(explode('q=', $v[1], 2), 2, '1')[1];
             $v[0] = $v[0];
             $v[2] = $k;
-            $acpt[$k] = $v;
+            $rslt[$k] = $v;
         }
+        $acpt = $rslt;
         usort($acpt, function ($a, $b) {
             if ($a[1] > $b[1]) {
                 return -1;
@@ -536,7 +547,7 @@ class Request extends ServerRequest
      * @param  array|null   $allowed an optional list of lowercase language codes to intersect with, defaults to null
      * @return string       the prefered language code
      */
-    public function getPreferredResponseFormat(string $default = 'text/html', array $allowed = null) : string
+    public function getPreferredResponseFormat(string $default = 'text/html', array $allowed = null): string
     {
         // parse accept header (uses default instead of 406 header)
         $acpt = $this->getPreferredResponseFormats();
@@ -550,23 +561,22 @@ class Request extends ServerRequest
         }
         return $default;
     }
-    public function hasCertificate()
+    public function hasCertificate(): bool
     {
         return $this->certificateNumber !== null;
     }
-    public function getCertificateNumber()
+    public function getCertificateNumber(): ?string
     {
         return $this->certificateNumber;
     }
-    public function getCertificate()
+    public function getCertificate(): ?string
     {
         return $this->certificateData;
     }
-    public function withCertificate(string $number, string $data = null)
+    public function withCertificate(string $number, string $data = null): static
     {
-        $ret = clone $this;
-        $ret->certificateNumber = strtoupper(ltrim(trim($number), '0'));
-        $ret->certificateData = $data;
-        return $ret;
+        $this->certificateNumber = strtoupper(ltrim(trim($number), '0'));
+        $this->certificateData = $data;
+        return $this;
     }
 }

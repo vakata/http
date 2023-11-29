@@ -6,17 +6,17 @@ use Laminas\Diactoros\Uri as LaminasUri;
 
 class Uri extends LaminasUri
 {
-    protected $basePath;
-    protected $realPath;
-    protected $segments;
+    protected string $basePath;
+    protected string $realPath;
+    protected array $segments;
 
-    public function __construct($uri = '', string $base = null)
+    public function __construct(string $uri = '', string $base = null)
     {
         parent::__construct($uri);
         $this->setBasePath($base);
     }
 
-    public function setBasePath(string $base = null)
+    public function setBasePath(string $base = null): static
     {
         $base = $base ?: (isset($_SERVER['PHP_SELF']) ? dirname($_SERVER['PHP_SELF']) : '/');
         $this->basePath = str_replace('//', '/', '/' . trim(str_replace('\\', '/', $base), '/') . '/');
@@ -39,22 +39,22 @@ class Uri extends LaminasUri
         return $this;
     }
 
-    public function getBasePath()
+    public function getBasePath(): string
     {
         return $this->basePath;
     }
-    public function getRealPath()
+    public function getRealPath(): string
     {
         return $this->realPath;
     }
-    public function getSegment($index, $default = null)
+    public function getSegment(mixed $index, string $default = ''): string
     {
         if (is_numeric($index) && (int)$index < 0) {
             $index = count($this->segments) - 2 + $index; // -2 to avoid "base" and "path"
         }
         return $this->segments[$index] ?? $default;
     }
-    public function linkTo(string $path = '', array $params = [], bool $absolute = false)
+    public function linkTo(string $path = '', array $params = [], bool $absolute = false): string
     {
         if (strpos($path, '?') !== false) {
             list($path, $query) = explode('?', $path, 2);
@@ -93,16 +93,16 @@ class Uri extends LaminasUri
         }
         return $path . $frag;
     }
-    public function self(bool $absolute = false)
+    public function self(bool $absolute = false): string
     {
         return $this->linkTo($this->realPath . ($this->getQuery() ? '?' . $this->getQuery() : ''), [], $absolute);
     }
 
-    public function get(string $path = '', array $params = [], int $relative = 0)
+    public function get(string $path = '', array $params = [], int $relative = 0): string
     {
         return $this->linkTo($path, $params, $relative > 0);
     }
-    public function __invoke(string $path = '', array $params = [], int $relative = 0)
+    public function __invoke(string $path = '', array $params = [], int $relative = 0): string
     {
         return $this->linkTo($path, $params, $relative > 0);
     }

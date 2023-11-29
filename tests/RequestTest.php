@@ -1,17 +1,8 @@
 <?php
 namespace vakata\http\test;
 
-class RequestTest extends \PHPUnit_Framework_TestCase
+class RequestTest extends \PHPUnit\Framework\TestCase
 {
-	public static function setUpBeforeClass() {
-	}
-	public static function tearDownAfterClass() {
-	}
-	protected function setUp() {
-	}
-	protected function tearDown() {
-	}
-
 	public function testCreate() {
 		$req = \vakata\http\Request::fromString("GET / HTTP/1.1");
 		$this->assertEquals('1.1', $req->getProtocolVersion());
