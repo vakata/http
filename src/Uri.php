@@ -98,12 +98,12 @@ class Uri extends LaminasUri
         return $this->linkTo($this->realPath . ($this->getQuery() ? '?' . $this->getQuery() : ''), [], $absolute);
     }
 
-    public function get(string $path = '', array $params = [], int $relative = 0): string
+    public function get(string $path = '', array $params = [], bool $absolute = false): string
     {
-        return $this->linkTo($path, $params, $relative > 0);
+        return $this->linkTo($path, $params, $absolute);
     }
-    public function __invoke(string $path = '', array $params = [], int $relative = 0): string
+    public function __invoke(string $path = '', array $params = [], bool $absolute = false): string
     {
-        return $this->linkTo($path, $params, $relative > 0);
+        return $this->linkTo($path, $params, $absolute);
     }
 }
