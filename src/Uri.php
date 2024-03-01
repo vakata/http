@@ -34,18 +34,25 @@ class Uri extends LaminasUri
                 return $v !== '';
             }
         ));
-        $this->segments['base'] = $this->basePath;
-        $this->segments['path'] = trim($this->realPath, '/');
+        $base = trim(implode('/', array_map('rawurldecode', array_filter(
+            explode('/', trim($this->basePath, '/')),
+            function ($v) {
+                return $v !== '';
+            }
+        ))), '/');
+        $real = trim(implode('/', $this->segments), '/');
+        $this->segments['base'] = '/' . $base;
+        $this->segments['path'] = '/' . $real;
         return $this;
     }
 
-    public function getBasePath(): string
+    public function getBasePath(bool $decoded = false): string
     {
-        return $this->basePath;
+        return $decoded ? $this->segments['base'] : $this->basePath;
     }
-    public function getRealPath(): string
+    public function getRealPath(bool $decoded = false): string
     {
-        return $this->realPath;
+        return $decoded ? $this->segments['path'] : $this->realPath;
     }
     public function getSegment(mixed $index, string $default = ''): string
     {
@@ -60,6 +67,8 @@ class Uri extends LaminasUri
             list($path, $query) = explode('?', $path, 2);
             $params = array_merge(Request::fixedQueryParams($query), $params);
         }
+        // parse_url breaks utf8 sometimes - encode it in advance
+        $path = preg_replace_callback('(\pL)ui', function ($m) { return rawurlencode($m[0]); }, $path);
         $data = parse_url($path . (count($params) ? '?' . http_build_query($params) : ''));
         if (!isset($data['host']) && !isset($data['path'])) {
             throw new \Exception('Invalid destination');
