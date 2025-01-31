@@ -10,7 +10,7 @@ class Response extends PSRResponse
 {
     protected ?Closure $callback = null;
 
-    public function __construct(int $status = 200, string $body = null, array $headers = [])
+    public function __construct(int $status = 200, ?string $body = null, array $headers = [])
     {
         if ($body !== null) {
             $temp = (new Stream('php://temp', 'wb+'));
@@ -150,11 +150,11 @@ class Response extends PSRResponse
         return $this->withHeader('Content-Type', $type);
     }
 
-    public function withCallback(callable $callback = null): static
+    public function withCallback(?callable $callback = null): static
     {
         return $this->setBody('')->setCallback($callback);
     }
-    protected function setCallback(callable $callback = null): static
+    protected function setCallback(?callable $callback = null): static
     {
         $this->callback = $callback ? Closure::fromCallable($callback) : null;
         return $this;

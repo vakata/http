@@ -26,11 +26,11 @@ class Request extends ServerRequest
      * @return Request
      */
     public static function fromGlobals(
-        array $server = null,
-        array $query = null,
-        array $body = null,
-        array $cookies = null,
-        array $files = null
+        ?array $server = null,
+        ?array $query = null,
+        ?array $body = null,
+        ?array $cookies = null,
+        ?array $files = null
     ): Request
     {
         $server  = \Laminas\Diactoros\normalizeServer($server ?: $_SERVER);
@@ -102,7 +102,7 @@ class Request extends ServerRequest
 
         list($headers, $message) = array_pad(explode($break . $break, $str, 2), 2, '');
         $headers = explode($break, preg_replace("(" . $break . "\s+)", " ", $headers));
-        if (isset($headers[0]) && strlen($headers[0])) {
+        if (strlen($headers[0])) {
             $temp = explode(' ', $headers[0]);
             if (in_array($temp[0], ['GET', 'POST', 'HEAD', 'PATCH', 'PUT', 'OPTIONS', 'TRACE', 'DELETE'])) {
                 $method = $temp[0];
@@ -276,8 +276,8 @@ class Request extends ServerRequest
         array $queryParams = [],
         $parsedBody = null,
         $protocol = '1.1',
-        string $certificateNumber = null,
-        string $certificateData = null
+        ?string $certificateNumber = null,
+        ?string $certificateData = null
     ) {
         $this->url = new Uri((string)$uri);
         parent::__construct(
@@ -492,7 +492,7 @@ class Request extends ServerRequest
      * @param  array|null   $allowed an optional list of lowercase language codes to intersect with, defaults to null
      * @return string       the prefered language code
      */
-    public function getPreferredResponseLanguage(string $default = 'en', array $allowed = null): string
+    public function getPreferredResponseLanguage(string $default = 'en', ?array $allowed = null): string
     {
         $acpt = $this->getPreferredResponseLanguages(true);
         foreach ($acpt as $lang) {
@@ -547,7 +547,7 @@ class Request extends ServerRequest
      * @param  array|null   $allowed an optional list of lowercase language codes to intersect with, defaults to null
      * @return string       the prefered language code
      */
-    public function getPreferredResponseFormat(string $default = 'text/html', array $allowed = null): string
+    public function getPreferredResponseFormat(string $default = 'text/html', ?array $allowed = null): string
     {
         // parse accept header (uses default instead of 406 header)
         $acpt = $this->getPreferredResponseFormats();
@@ -573,7 +573,7 @@ class Request extends ServerRequest
     {
         return $this->certificateData;
     }
-    public function withCertificate(string $number, string $data = null): static
+    public function withCertificate(string $number, ?string $data = null): static
     {
         $this->certificateNumber = strtoupper(ltrim(trim($number), '0'));
         $this->certificateData = $data;

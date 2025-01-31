@@ -10,13 +10,13 @@ class Uri extends LaminasUri
     protected string $realPath;
     protected array $segments;
 
-    public function __construct(string $uri = '', string $base = null)
+    public function __construct(string $uri = '', ?string $base = null)
     {
         parent::__construct($uri);
         $this->setBasePath($base);
     }
 
-    public function setBasePath(string $base = null): static
+    public function setBasePath(?string $base = null): static
     {
         $base = $base ?: (isset($_SERVER['PHP_SELF']) ? dirname($_SERVER['PHP_SELF']) : '/');
         $this->basePath = str_replace('//', '/', '/' . trim(str_replace('\\', '/', $base), '/') . '/');
