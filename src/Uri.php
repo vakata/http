@@ -19,6 +19,9 @@ class Uri extends LaminasUri
     public function setBasePath(?string $base = null): static
     {
         $base = $base ?: (isset($_SERVER['PHP_SELF']) ? dirname($_SERVER['PHP_SELF']) : '/');
+        if ($base === '.') {
+            $base = '/';
+        }
         $this->basePath = str_replace('//', '/', '/' . trim(str_replace('\\', '/', $base), '/') . '/');
         $this->realPath = $this->getPath();
         $hasTrailingSlash = strlen($this->realPath) && substr($this->realPath, -1) === '/';
