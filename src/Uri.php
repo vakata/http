@@ -66,6 +66,7 @@ class Uri extends LaminasUri
     }
     public function linkTo(string $path = '', array $params = [], bool $absolute = false): string
     {
+        $orig = $path;
         if (strpos($path, '?') !== false) {
             list($path, $query) = explode('?', $path, 2);
             $params = array_merge(Request::fixedQueryParams($query), $params);
@@ -74,7 +75,7 @@ class Uri extends LaminasUri
         $path = preg_replace_callback('(\pL)ui', function ($m) { return rawurlencode($m[0]); }, $path);
         $data = parse_url($path . (count($params) ? '?' . http_build_query($params) : ''));
         if (!isset($data['host']) && !isset($data['path'])) {
-            throw new \Exception('Invalid destination');
+            return $orig;
         }
         if (!isset($data['path']) || !strlen($data['path'])) {
             $data['path'] = isset($data['host']) ? '/' : $this->getBasePath();
@@ -87,10 +88,9 @@ class Uri extends LaminasUri
             explode('/', $data['path'])
         ));
         $curr = parse_url((string)$this);
-        unset($curr['query']);
-        unset($curr['fragment']);
-        $data = array_merge($curr, $data);
-        $host = $data['host'] . (isset($data['port']) ? ':' . $data['port'] : '');
+        $host = isset($data['host']) ?
+            $data['host'] . (isset($data['port']) ? ':' . $data['port'] : '') :
+            $curr['host'] . (isset($curr['port']) ? ':' . $curr['port'] : '');
         $data['path'] = implode('/', array_map('rawurlencode', explode('/', $data['path'])));
         $path = $data['path'] . (isset($data['query']) ? '?' . $data['query'] : '');
         $frag = isset($data['fragment']) ? '#' . $data['fragment'] : '';
