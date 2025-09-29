@@ -138,6 +138,9 @@ class Response extends PSRResponse
             case "jpg":
                 $type = "image/jpeg";
                 break;
+            case "svg":
+                $type = "image/svg+xml";
+                break;
             case "html":
             case "php":
             case "htm":
