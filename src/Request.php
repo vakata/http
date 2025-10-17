@@ -61,7 +61,6 @@ class Request extends ServerRequest
         if (null === $cookies && array_key_exists('cookie', $headers)) {
             $cookies = self::parseCookieHeader($headers['cookie']);
         }
-        
 
         if ($body === null) {
             $temp = file_get_contents('php://input');
@@ -231,11 +230,18 @@ class Request extends ServerRequest
             }
             if ($name[count($name) - 1] == '') {
                 if (!is_array($tmp)) {
-                    $tmp = [];
+                    $tmp = [$tmp];
                 }
                 $tmp[] = $value;
             } else {
-                $tmp = $value;
+                if (!is_array($tmp) || count($tmp)) {
+                    if (!is_array($tmp)) {
+                        $tmp = [$tmp];
+                    }
+                    $tmp[] = $value;
+                } else {
+                    $tmp = $value;
+                }
             }
         }
         return $data;
@@ -468,7 +474,7 @@ class Request extends ServerRequest
             $v[2] = $k;
             $rslt[$k] = $v;
         }
-        $acpt = $rslt; 
+        $acpt = $rslt;
         usort($acpt, function ($a, $b) {
             if ($a[1] > $b[1]) {
                 return -1;
