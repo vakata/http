@@ -214,34 +214,34 @@ class Request extends ServerRequest
             $value = isset($var[1]) ? urldecode($var[1]) : '';
             $name  = explode(']', str_replace(['][', '['], ']', $name));
             $name  = count($name) > 1 ? array_slice($name, 0, -1) : $name;
-
             $tmp = &$data;
             foreach ($name as $k) {
-                if ($k === "") {
+                if ($k === "") { // empty key found: data[]
+                    if (!is_array($tmp)) {
+                        $tmp = [];
+                    }
+                    $tmp[] = null;
+                    end($tmp);
+                    $k = key($tmp);
+                    $tmp = &$tmp[$k];
                     continue;
                 }
+                // string key found: data[string]
                 if (!is_array($tmp)) {
                     $tmp = [];
                 }
                 if (!isset($tmp[$k])) {
-                    $tmp[$k] = [];
+                    $tmp[$k] = null;
                 }
                 $tmp = &$tmp[$k];
             }
-            if ($name[count($name) - 1] == '') {
+            if (isset($tmp)) {
                 if (!is_array($tmp)) {
                     $tmp = [$tmp];
                 }
                 $tmp[] = $value;
             } else {
-                if (!is_array($tmp) || count($tmp)) {
-                    if (!is_array($tmp)) {
-                        $tmp = [$tmp];
-                    }
-                    $tmp[] = $value;
-                } else {
-                    $tmp = $value;
-                }
+                $tmp = $value;
             }
         }
         return $data;

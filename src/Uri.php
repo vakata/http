@@ -75,7 +75,7 @@ class Uri extends LaminasUri
         $path = preg_replace_callback('(\pL)ui', function ($m) { return rawurlencode($m[0]); }, $path);
         $data = parse_url($path . (count($params) ? '?' . http_build_query($params) : ''));
         if (!isset($data['host']) && !isset($data['path'])) {
-            return $orig;
+            return $orig . (count($params) ? '?' . http_build_query($params) : '');
         }
         if (!isset($data['path']) || !strlen($data['path'])) {
             $data['path'] = isset($data['host']) ? '/' : $this->getBasePath();
@@ -110,7 +110,7 @@ class Uri extends LaminasUri
         return $this->linkTo($this->realPath . ($this->getQuery() ? '?' . $this->getQuery() : ''), [], $absolute);
     }
 
-    public function get(string $path = '', array $params = [], bool $absolute = false): string
+    public function get(?string $path = null, array $params = [], bool $absolute = false): string
     {
         return $this->linkTo($path, $params, $absolute);
     }
