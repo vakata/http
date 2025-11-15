@@ -30,7 +30,8 @@ class Request extends ServerRequest
         ?array $query = null,
         ?array $body = null,
         ?array $cookies = null,
-        ?array $files = null
+        ?array $files = null,
+        bool $normalizeArrays = false
     ): Request
     {
         $server  = \Laminas\Diactoros\normalizeServer($server ?: $_SERVER);
@@ -68,7 +69,7 @@ class Request extends ServerRequest
                 if (isset($headers['content-type']) && strpos($headers['content-type'], 'json') !== false) {
                     $body = json_decode($temp, true);
                 } else {
-                    $body = static::fixedQueryParams($temp);
+                    $body = static::fixedQueryParams($temp, $normalizeArrays);
                 }
             }
         }
@@ -81,14 +82,14 @@ class Request extends ServerRequest
             'php://input',
             $headers,
             $cookies ?: $_COOKIE,
-            $query ?: static::fixedQueryParams($uri->getQuery()),
+            $query ?: static::fixedQueryParams($uri->getQuery(), $normalizeArrays),
             $body ?: (count($_POST) ? $_POST : null),
             \Laminas\Diactoros\marshalProtocolVersionFromSapi($server),
             $server['SSL_CLIENT_M_SERIAL'] ?? null,
             $server['SSL_CLIENT_CERT'] ?? null
         );
     }
-    public static function fromString(string $str): Request
+    public static function fromString(string $str, bool $normalizeArrays = false): Request
     {
         $method = 'GET';
         $version = '1.1';
@@ -186,7 +187,7 @@ class Request extends ServerRequest
         if (isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'json') !== false) {
             $params = json_decode($body, true);
         } else {
-            $params = static::fixedQueryParams($body);
+            $params = static::fixedQueryParams($body, $normalizeArrays);
         }
         $temp = (new Stream('php://temp', 'wb+'));
         $temp->write($body);
@@ -199,12 +200,12 @@ class Request extends ServerRequest
             $temp,
             $headers,
             isset($headers['Cookie']) ? self::parseCookieHeader($headers['Cookie']) : [],
-            static::fixedQueryParams($uri->getQuery()),
+            static::fixedQueryParams($uri->getQuery(), $normalizeArrays),
             $params ?? [],
             $version
         );
     }
-    public static function fixedQueryParams(string $query): array
+    public static function fixedQueryParams(string $query, bool $normalizeArrays = false): array
     {
         $data = [];
         $temp = strlen($query) ? explode('&', $query) : [];
@@ -242,6 +243,21 @@ class Request extends ServerRequest
                 $tmp[] = $value;
             } else {
                 $tmp = $value;
+            }
+        }
+        if ($normalizeArrays) {
+            $data = self::normalizeArray($data);
+        }
+        return $data;
+    }
+    private static function normalizeArray(array $data) {
+        foreach ($data as $k => $v) {
+            if (is_array($v) && count($v) === 1 && isset($v[0]) && $v[0] === '') {
+                $data[$k] = [];
+            } elseif (is_array($v)) {
+                $data[$k] = self::normalizeArray($v);
+            } else {
+                $data[$k] = $v;
             }
         }
         return $data;
